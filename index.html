@@ -1,75 +1,65 @@
 <!doctype html>
 <html lang="pl">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#111827">
-  <title>Auto Body Manager</title>
-  <style>
-    *{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f3f4f6;color:#111827}
-    header{background:#111827;color:white;padding:18px 16px;position:sticky;top:0;z-index:5}
-    .top{display:flex;justify-content:space-between;align-items:center;gap:12px}.brand{font-size:20px;font-weight:800}
-    button,select{font:inherit}.mode{background:#374151;color:white;border:0;border-radius:10px;padding:9px 12px}
-    main{max-width:900px;margin:auto;padding:16px 16px 90px}.card{background:white;border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 2px 10px #00000010}
-    h2{margin:4px 0 12px;font-size:21px}.muted{color:#6b7280}.row{display:flex;justify-content:space-between;gap:12px;align-items:center}
-    .badge{display:inline-block;padding:5px 9px;border-radius:999px;background:#e5e7eb;font-size:12px;font-weight:700}
-    .ok{background:#dcfce7;color:#166534}.warn{background:#fef3c7;color:#92400e}
-    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.btn{border:0;border-radius:10px;padding:11px 14px;font-weight:700;background:#e5e7eb;color:#111827}
-    .primary{background:#2563eb;color:white}.danger{background:#dc2626;color:white}.success{background:#16a34a;color:white}
-    nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e5e7eb;display:flex;justify-content:center;z-index:10}
-    nav button{flex:1;max-width:180px;border:0;background:white;padding:13px 6px;color:#6b7280;font-size:12px}nav button.active{color:#2563eb;font-weight:800}
-    .hidden{display:none}.stat{font-size:28px;font-weight:800}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-    input{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:10px;margin:5px 0 10px}
-    @media(min-width:700px){.grid{grid-template-columns:repeat(4,1fr)}}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111827">
+<title>🚚 Auto Body Manager</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f4f6;color:#111827;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:#111827;color:white;padding:16px} .top,main{max-width:1000px;margin:auto}.top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+h1{font-size:22px;margin:0}.role,button,input,select,textarea{font:inherit}.role{padding:11px;border:0;border-radius:10px;background:#374151;color:white}
+main{padding:18px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.card{background:white;border-radius:15px;padding:17px;margin-bottom:12px;box-shadow:0 1px 5px #0001}.row{display:flex;justify-content:space-between;gap:10px;align-items:center}
+button{border:0;border-radius:10px;padding:11px 15px}.primary{background:#2563eb;color:white}.success{background:#16a34a;color:white}.danger{background:#dc2626;color:white}.secondary{background:#e5e7eb}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.badge{padding:5px 9px;border-radius:999px;font-size:13px;font-weight:700;background:#fef3c7}.green{background:#dcfce7;color:#166534}.red{background:#fee2e2;color:#991b1b}.blue{background:#dbeafe;color:#1e40af}
+.muted{color:#6b7280}.stat{font-size:30px;font-weight:800}label{display:block;font-weight:600;margin:10px 0 5px}
+input,textarea{width:100%;padding:11px;border:1px solid #d1d5db;border-radius:9px}textarea{min-height:80px}.hidden{display:none!important}
+nav{display:flex;gap:8px;overflow:auto;margin-bottom:15px}nav button{white-space:nowrap}.route{border-left:5px solid #2563eb}.route.done{border-left-color:#16a34a}.route.problem{border-left-color:#dc2626}
+.notice{padding:12px;background:#eff6ff;border-radius:10px;color:#1e3a8a;margin-bottom:14px}
+</style>
 </head>
 <body>
-<header><div class="top"><div class="brand">🚚 Auto Body Manager</div><select id="mode" class="mode"><option value="driver">Kierowca</option><option value="manager">Kierownik</option></select></div></header>
-<main id="app"></main>
-<nav id="nav"></nav>
+<header><div class="top"><h1>🚚 Auto Body Manager</h1>
+<select id="role" class="role"><option value="driver">Kierowca</option><option value="manager">Kierownik</option></select></div></header>
+<main>
+<div class="notice">Auto Body Manager V2 — trasy, odbiory, status „Odebrane”, problemy i nawigacja.</div>
+
+<section id="driverView">
+<nav><button class="primary" onclick="driverTab('routes')">🚚 Trasy</button><button class="secondary" onclick="driverTab('problem')">⚠️ Problem</button></nav>
+<div id="driverRoutes"></div>
+<div id="driverProblem" class="card hidden"><h2>⚠️ Zgłoś problem</h2>
+<label>Warsztat</label><input id="problemGarage" placeholder="Nazwa warsztatu">
+<label>Opis</label><textarea id="problemText" placeholder="Opisz problem..."></textarea>
+<div class="actions"><button class="danger" onclick="reportProblem()">Wyślij zgłoszenie</button></div></div>
+</section>
+
+<section id="managerView" class="hidden">
+<nav><button class="primary" onclick="managerTab('dashboard')">📊 Panel</button><button class="secondary" onclick="managerTab('routes')">🗺️ Trasy</button><button class="secondary" onclick="managerTab('add')">➕ Dodaj trasę</button></nav>
+<div id="managerDashboard"></div><div id="managerRoutes" class="hidden"></div>
+<div id="managerAdd" class="card hidden"><h2>➕ Dodaj trasę</h2>
+<label>Warsztat</label><input id="garage"><label>Adres / postcode</label><input id="address">
+<label>Kierowca</label><input id="driver"><label>Data</label><input id="date" type="date">
+<label>Uwagi</label><textarea id="notes"></textarea><div class="actions"><button class="success" onclick="addRoute()">Dodaj trasę</button></div></div>
+</section>
+</main>
 <script>
-const demo={
- route:{name:"Trasa 1 — Manchester",date:"22/08/2026",driver:"Kierowca",vehicle:"Ford Transit Luton"},
- pickups:[
-  {id:1,workshop:"Manchester Auto Parts",address:"Manchester, UK",time:"08:30",status:"Do odebrania"},
-  {id:2,workshop:"Body Repair Centre",address:"Salford, UK",time:"10:15",status:"Do odebrania"},
-  {id:3,workshop:"Auto Repairs",address:"Warrington, UK",time:"13:00",status:"Do odebrania"}
- ],
- routes:[{id:1,name:"Trasa 1 — Manchester",driver:"Kierowca",status:"Aktywna",stops:3},{id:2,name:"Trasa 2 — Liverpool",driver:"—",status:"Do przydzielenia",stops:5}]
-};
-let mode="driver",tab="home";
-const app=document.getElementById("app"), nav=document.getElementById("nav"), modeEl=document.getElementById("mode");
-modeEl.onchange=()=>{mode=modeEl.value;tab="home";render()};
-function maps(address){window.open("https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(address),"_blank")}
-function pickupCard(p){
- return `<div class="card"><div class="row"><strong>${p.workshop}</strong><span class="badge ${p.status==="Odebrane"?"ok":""}">${p.status}</span></div>
- <div class="muted" style="margin-top:6px">${p.address} · ${p.time}</div>
- <div class="actions"><button class="btn primary" onclick="maps('${p.address}')">📍 Nawiguj</button>
- <button class="btn success" onclick="setStatus(${p.id},'Odebrane')">✓ Odebrane</button>
- <button class="btn danger" onclick="setStatus(${p.id},'Problem')">⚠ Problem</button></div></div>`;
-}
-function setStatus(id,status){demo.pickups.find(p=>p.id===id).status=status;render()}
-function driverHome(){
- const done=demo.pickups.filter(p=>p.status==="Odebrane").length;
- return `<h2>Moja trasa</h2><div class="card"><div class="row"><div><div class="muted">${demo.route.date}</div><strong>${demo.route.name}</strong><div class="muted">${demo.route.vehicle}</div></div><span class="badge">${done}/${demo.pickups.length}</span></div></div>
- <div class="grid"><div class="card"><div class="stat">${demo.pickups.length}</div><div class="muted">Odbiorów</div></div><div class="card"><div class="stat">${done}</div><div class="muted">Odebrane</div></div></div>
- <h2>Najbliższe odbiory</h2>${demo.pickups.map(pickupCard).join("")}`;
-}
-function pickups(){return `<h2>Odbiory</h2>${demo.pickups.map(pickupCard).join("")}`}
-function managerHome(){
- return `<h2>Panel kierownika</h2><div class="grid"><div class="card"><div class="stat">${demo.routes.length}</div><div class="muted">Tras</div></div><div class="card"><div class="stat">${demo.pickups.length}</div><div class="muted">Odbiorów</div></div><div class="card"><div class="stat">1</div><div class="muted">Aktywna</div></div><div class="card"><div class="stat">0</div><div class="muted">Problemów</div></div></div>
- <h2>Wszystkie trasy</h2>${demo.routes.map(r=>`<div class="card"><div class="row"><strong>${r.name}</strong><span class="badge">${r.status}</span></div><div class="muted">Kierowca: ${r.driver} · ${r.stops} punktów</div><div class="actions"><button class="btn primary" onclick="tab='routes';render()">Zarządzaj trasą</button></div></div>`).join("")}`;
-}
-function routes(){return `<h2>Trasy</h2>${demo.routes.map(r=>`<div class="card"><div class="row"><strong>${r.name}</strong><span class="badge">${r.status}</span></div><p class="muted">Kierowca: ${r.driver}<br>Punkty odbioru: ${r.stops}</p><div class="actions"><button class="btn primary">✏ Edytuj</button><button class="btn success">+ Dodaj odbiór</button></div></div>`).join("")}`}
-function render(){
- let content="";
- if(mode==="manager") content=tab==="routes"?routes():managerHome();
- else content=tab==="pickups"?pickups():driverHome();
- app.innerHTML=content;
- const items=mode==="manager"?[["home","🏠","Panel"],["routes","🛣️","Trasy"]]:[["home","🏠","Start"],["pickups","📦","Odbiory"]];
- nav.innerHTML=items.map(([id,icon,label])=>`<button class="${tab===id?"active":""}" onclick="tab='${id}';render()">${icon}<br>${label}</button>`).join("");
-}
-render();
+const KEY="auto_body_manager_v2";
+let routes=JSON.parse(localStorage.getItem(KEY)||"null")||[];
+const $=id=>document.getElementById(id), esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+function save(){localStorage.setItem(KEY,JSON.stringify(routes))}
+function badge(s){let c=s==="Odebrane"?"green":s==="Problem"?"red":s==="W trasie"?"blue":"";return `<span class="badge ${c}">${esc(s)}</span>`}
+function map(a){return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(a)}
+function render(){let manager=$("role").value==="manager";$("driverView").classList.toggle("hidden",manager);$("managerView").classList.toggle("hidden",!manager);manager?renderManager():renderDriver()}
+function renderDriver(){$("driverRoutes").innerHTML=routes.length?routes.map(r=>`<div class="card route ${r.status==="Odebrane"?"done":r.status==="Problem"?"problem":""}"><div class="row"><h2>${esc(r.garage)}</h2>${badge(r.status)}</div><div class="muted">📍 ${esc(r.address)} · 📅 ${esc(r.date)}</div><p>${esc(r.notes)}</p>${r.problem?`<div class="notice">⚠️ ${esc(r.problem)}</div>`:""}<div class="actions"><a href="${map(r.address)}" target="_blank"><button class="secondary">🧭 Nawigacja</button></a>${r.status!=="Odebrane"?`<button class="success" onclick="status(${r.id},'Odebrane')">✅ Odebrane</button>`:""}<button class="danger" onclick="problem(${r.id})">⚠️ Problem</button></div></div>`).join(""):'<div class="card">Brak przydzielonych tras.</div>'}
+function renderManager(){let done=routes.filter(r=>r.status==="Odebrane").length,pro=routes.filter(r=>r.status==="Problem").length;$("managerDashboard").innerHTML=`<div class="grid"><div class="card"><div class="muted">Wszystkie trasy</div><div class="stat">${routes.length}</div></div><div class="card"><div class="muted">Odebrane</div><div class="stat">${done}</div></div><div class="card"><div class="muted">Problemy</div><div class="stat">${pro}</div></div></div>`;$("managerRoutes").innerHTML=routes.map(r=>`<div class="card route"><div class="row"><h2>${esc(r.garage)}</h2>${badge(r.status)}</div><div class="muted">📍 ${esc(r.address)} · 👤 ${esc(r.driver)} · 📅 ${esc(r.date)}</div><p>${esc(r.notes)}</p>${r.problem?`<div class="notice">⚠️ ${esc(r.problem)}</div>`:""}<div class="actions"><a href="${map(r.address)}" target="_blank"><button class="secondary">🧭 Mapa</button></a><button class="success" onclick="status(${r.id},'Odebrane')">✅ Odebrane</button><button class="danger" onclick="status(${r.id},'Problem')">⚠️ Problem</button><button class="secondary" onclick="del(${r.id})">Usuń</button></div></div>`).join("")||'<div class="card">Brak tras.</div>'}
+function status(id,s){let r=routes.find(x=>x.id===id);if(r){r.status=s;save();render()}}
+function problem(id){let r=routes.find(x=>x.id===id),p=prompt("Opisz problem:");if(r&&p){r.status="Problem";r.problem=p;save();render()}}
+function reportProblem(){let g=$("problemGarage").value.trim(),p=$("problemText").value.trim();if(!g||!p)return alert("Uzupełnij pola.");routes.push({id:Date.now(),garage:g,address:"",driver:"Kierowca",date:new Date().toISOString().slice(0,10),status:"Problem",notes:"Zgłoszenie kierowcy",problem:p});save();$("problemGarage").value="";$("problemText").value="";alert("Problem zgłoszony.");driverTab("routes");render()}
+function addRoute(){let g=$("garage").value.trim(),a=$("address").value.trim(),d=$("driver").value.trim(),date=$("date").value,n=$("notes").value.trim();if(!g||!a||!d||!date)return alert("Uzupełnij warsztat, adres, kierowcę i datę.");routes.push({id:Date.now(),garage:g,address:a,driver:d,date,status:"Nowe",notes:n,problem:""});save();managerTab("routes");render()}
+function del(id){if(confirm("Usunąć trasę?")){routes=routes.filter(r=>r.id!==id);save();render()}}
+function driverTab(t){$("driverRoutes").classList.toggle("hidden",t!=="routes");$("driverProblem").classList.toggle("hidden",t!=="problem")}
+function managerTab(t){$("managerDashboard").classList.toggle("hidden",t!=="dashboard");$("managerRoutes").classList.toggle("hidden",t!=="routes");$("managerAdd").classList.toggle("hidden",t!=="add")}
+$("role").onchange=render;render();
 </script>
-</body>
-</html>
+</body></html>

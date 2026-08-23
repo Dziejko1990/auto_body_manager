@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#111827">
+  <title>Auto Body Manager</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #111827;
+      color: white;
+    }
+
+    .app {
+      max-width: 700px;
+      margin: auto;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    h1 {
+      margin: 10px 0 5px;
+      font-size: 30px;
+    }
+
+    .subtitle {
+      color: #9ca3af;
+      margin-bottom: 25px;
+    }
+
+    .card {
+      background: #1f2937;
+      border: 1px solid #374151;
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    .card h2 {
+      margin-top: 0;
+      font-size: 20px;
+    }
+
+    label {
+      display: block;
+      margin: 12px 0 6px;
+      color: #d1d5db;
+      font-size: 14px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid #4b5563;
+      background: #111827;
+      color: white;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      border: 0;
+      border-radius: 10px;
+      padding: 14px;
+      margin-top: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .primary {
+      background: #22c55e;
+      color: white;
+    }
+
+    .secondary {
+      background: #374151;
+      color: white;
+    }
+
+    .route {
+      padding: 14px;
+      border-radius: 12px;
+      background: #111827;
+      border: 1px solid #374151;
+      margin-top: 10px;
+    }
+
+    .route strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .empty {
+      color: #9ca3af;
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge {
+      background: #2563eb;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <div class="top">
+    <div>
+      <h1>🚚 Auto Body Manager</h1>
+      <div class="subtitle">Zarządzanie trasami i odbiorami</div>
+    </div>
+    <div class="badge">DRIVER</div>
+  </div>
+
+  <div class="card">
+    <h2>➕ Nowy odbiór</h2>
+
+    <label>Warsztat / firma</label>
+    <input id="garage" type="text" placeholder="np. Golden Car Parts">
+
+    <label>Adres / postcode</label>
+    <input id="postcode" type="text" placeholder="np. WA3 3AL">
+
+    <label>Godzina odbioru</label>
+    <input id="time" type="time">
+
+    <label>Uwagi</label>
+    <input id="notes" type="text" placeholder="np. 5 bumperów">
+
+    <button class="primary" onclick="addPickup()">
+      Dodaj odbiór
+    </button>
+  </div>
+
+  <div class="card">
+    <h2>📍 Dzisiejsza trasa</h2>
+
+    <div id="routes">
+      <div class="empty">
+        Brak zaplanowanych odbiorów
+      </div>
+    </div>
+
+    <button class="secondary" onclick="clearRoutes()">
+      Wyczyść trasę
+    </button>
+  </div>
+
+  <div class="card">
+    <h2>👤 Kierowca</h2>
+    <p id="driver">Kierowca: nie ustawiono</p>
+
+    <button class="secondary" onclick="setDriver()">
+      Ustaw kierowcę
+    </button>
+  </div>
+
+</div>
+
+<script>
+
+let pickups = JSON.parse(localStorage.getItem("pickups") || "[]");
+
+function save() {
+  localStorage.setItem("pickups", JSON.stringify(pickups));
+}
+
+function render() {
+  const container = document.getElementById("routes");
+
+  if (pickups.length === 0) {
+    container.innerHTML =
+      '<div class="empty">Brak zaplanowanych odbiorów</div>';
+    return;
+  }
+
+  container.innerHTML = "";
+
+  pickups
+    .sort((a, b) => a.time.localeCompare(b.time))
+    .forEach((pickup, index) => {
+
+      const div = document.createElement("div");
+      div.className = "route";
+
+      div.innerHTML = `
+        <strong>${pickup.time || "--:--"} — ${escapeHtml(pickup.garage)}</strong>
+        <div>📍 ${escapeHtml(pickup.postcode)}</div>
+        <div>📝 ${escapeHtml(pickup.notes || "Brak uwag")}</div>
+        <button class="secondary" onclick="removePickup(${index})">
+          Usuń
+        </button>
+      `;
+
+      container.appendChild(div);
+    });
+}
+
+function addPickup() {
+
+  const garage = document.getElementById("garage").value.trim();
+  const postcode = document.getElementById("postcode").value.trim();
+  const time = document.getElementById("time").value;
+  const notes = document.getElementById("notes").value.trim();
+
+  if (!garage || !postcode) {
+    alert("Wpisz nazwę warsztatu i postcode.");
+    return;
+  }
+
+  pickups.push({
+    garage,
+    postcode,
+    time,
+    notes
+  });
+
+  save();
+  render();
+
+  document.getElementById("garage").value = "";
+  document.getElementById("postcode").value = "";
+  document.getElementById("time").value = "";
+  document.getElementById("notes").value = "";
+}
+
+function removePickup(index) {
+  pickups.splice(index, 1);
+  save();
+  render();
+}
+
+function clearRoutes() {
+
+  if (confirm("Czy na pewno wyczyścić całą trasę?")) {
+    pickups = [];
+    save();
+    render();
+  }
+}
+
+function setDriver() {
+
+  const name = prompt("Podaj imię kierowcy:");
+
+  if (name) {
+    localStorage.setItem("driver", name);
+    document.getElementById("driver").innerText =
+      "Kierowca: " + name;
+  }
+}
+
+function escapeHtml(text) {
+
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+const savedDriver = localStorage.getItem("driver");
+
+if (savedDriver) {
+  document.getElementById("driver").innerText =
+    "Kierowca: " + savedDriver;
+}
+
+render();
+
+</script>
+
+</body>
+</html>

@@ -1,288 +1,353 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#111827">
-  <title>Auto Body Manager</title>
-<link rel="stylesheet" href="style.css">
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auto Body Manager</title>
 
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #111827;
-      color: white;
-    }
+<style>
+* {
+  box-sizing: border-box;
+}
 
-    .app {
-      max-width: 700px;
-      margin: auto;
-      min-height: 100vh;
-      padding: 20px;
-    }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #111827;
+  color: white;
+}
 
-    h1 {
-      margin: 10px 0 5px;
-      font-size: 30px;
-    }
+.app {
+  max-width: 720px;
+  margin: auto;
+  min-height: 100vh;
+  padding: 20px;
+}
 
-    .subtitle {
-      color: #9ca3af;
-      margin-bottom: 25px;
-    }
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
 
-    .card {
-      background: #1f2937;
-      border: 1px solid #374151;
-      border-radius: 16px;
-      padding: 18px;
-      margin-bottom: 16px;
-    }
+.header h1 {
+  margin: 0;
+  font-size: 26px;
+}
 
-    .card h2 {
-      margin-top: 0;
-      font-size: 20px;
-    }
+.badge {
+  background: #2563eb;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+}
 
-    label {
-      display: block;
-      margin: 12px 0 6px;
-      color: #d1d5db;
-      font-size: 14px;
-    }
+.card {
+  background: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 22px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
 
-    input, select {
-      width: 100%;
-      padding: 14px;
-      border-radius: 10px;
-      border: 1px solid #4b5563;
-      background: #111827;
-      color: white;
-      font-size: 16px;
-    }
+.card h2 {
+  margin-top: 0;
+  font-size: 22px;
+}
 
-    button {
-      width: 100%;
-      border: 0;
-      border-radius: 10px;
-      padding: 14px;
-      margin-top: 14px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-    }
+label {
+  display: block;
+  margin: 15px 0 7px;
+  color: #d1d5db;
+}
 
-    .primary {
-      background: #22c55e;
-      color: white;
-    }
+input,
+textarea {
+  width: 100%;
+  padding: 15px;
+  border-radius: 14px;
+  border: 1px solid #4b5563;
+  background: #111827;
+  color: white;
+  font-size: 16px;
+}
 
-    .secondary {
-      background: #374151;
-      color: white;
-    }
+textarea {
+  min-height: 80px;
+  resize: vertical;
+}
 
-    .route {
-      padding: 14px;
-      border-radius: 12px;
-      background: #111827;
-      border: 1px solid #374151;
-      margin-top: 10px;
-    }
+button {
+  border: none;
+  border-radius: 14px;
+  padding: 15px 18px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
 
-    .route strong {
-      display: block;
-      margin-bottom: 5px;
-    }
+.add-btn {
+  width: 100%;
+  margin-top: 20px;
+  background: #22c55e;
+  color: white;
+}
 
-    .empty {
-      color: #9ca3af;
-      text-align: center;
-      padding: 20px 0;
-    }
+.add-btn:active {
+  transform: scale(.98);
+}
 
-    .top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-    }
+.route-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
-    .badge {
-      background: #2563eb;
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-    }
-  </style>
+.pickup {
+  background: #111827;
+  border: 1px solid #374151;
+  border-radius: 18px;
+  padding: 17px;
+  margin-top: 14px;
+}
+
+.pickup-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.time {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.company {
+  font-size: 18px;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+.info {
+  color: #d1d5db;
+  margin-top: 7px;
+}
+
+.notes {
+  color: #fbbf24;
+  margin-top: 8px;
+}
+
+.delete-btn {
+  background: #374151;
+  color: white;
+  width: 100%;
+  margin-top: 15px;
+}
+
+.empty {
+  text-align: center;
+  color: #9ca3af;
+  padding: 20px 0;
+}
+
+.footer {
+  text-align: center;
+  color: #6b7280;
+  font-size: 13px;
+  padding: 20px 0;
+}
+</style>
 </head>
 
 <body>
 
 <div class="app">
 
-  <div class="top">
-    <div>
-      <h1>🚚 Auto Body Manager</h1>
-      <div class="subtitle">Zarządzanie trasami i odbiorami</div>
-    </div>
+  <div class="header">
+    <h1>Auto Body Manager</h1>
     <div class="badge">DRIVER</div>
   </div>
 
   <div class="card">
+
     <h2>➕ Nowy odbiór</h2>
 
-    <label>Warsztat / firma</label>
-    <input id="garage" type="text" placeholder="np. Golden Car Parts">
+    <label for="company">Warsztat / firma</label>
+    <input
+      id="company"
+      type="text"
+      placeholder="np. Golden Car Parts"
+    >
 
-    <label>Adres / postcode</label>
-    <input id="postcode" type="text" placeholder="np. WA3 3AL">
+    <label for="address">Adres / postcode</label>
+    <input
+      id="address"
+      type="text"
+      placeholder="np. WA3 3AL"
+    >
 
-    <label>Godzina odbioru</label>
-    <input id="time" type="time">
+    <label for="time">Godzina odbioru</label>
+    <input
+      id="time"
+      type="time"
+    >
 
-    <label>Uwagi</label>
-    <input id="notes" type="text" placeholder="np. 5 bumperów">
+    <label for="notes">Uwagi</label>
+    <textarea
+      id="notes"
+      placeholder="np. 5 bumperów"
+    ></textarea>
 
-    <button class="primary" onclick="addPickup()">
+    <button class="add-btn" onclick="addPickup()">
       Dodaj odbiór
     </button>
+
   </div>
 
   <div class="card">
-    <h2>📍 Dzisiejsza trasa</h2>
 
-    <div id="routes">
-      <div class="empty">
-        Brak zaplanowanych odbiorów
-      </div>
+    <div class="route-title">
+      <h2>📍 Dzisiejsza trasa</h2>
     </div>
 
-    <button class="secondary" onclick="clearRoutes()">
-      Wyczyść trasę
-    </button>
+    <div id="route"></div>
+
   </div>
 
-  <div class="card">
-    <h2>👤 Kierowca</h2>
-    <p id="driver">Kierowca: nie ustawiono</p>
-
-    <button class="secondary" onclick="setDriver()">
-      Ustaw kierowcę
-    </button>
+  <div class="footer">
+    Auto Body Manager
   </div>
 
 </div>
 
 <script>
 
-let pickups = JSON.parse(localStorage.getItem("pickups") || "[]");
+let pickups = JSON.parse(
+  localStorage.getItem("autoBodyPickups") || "[]"
+);
 
 function save() {
-  localStorage.setItem("pickups", JSON.stringify(pickups));
-}
-
-function render() {
-  const container = document.getElementById("routes");
-
-  if (pickups.length === 0) {
-    container.innerHTML =
-      '<div class="empty">Brak zaplanowanych odbiorów</div>';
-    return;
-  }
-
-  container.innerHTML = "";
-
-  pickups
-    .sort((a, b) => a.time.localeCompare(b.time))
-    .forEach((pickup, index) => {
-
-      const div = document.createElement("div");
-      div.className = "route";
-
-      div.innerHTML = `
-        <strong>${pickup.time || "--:--"} — ${escapeHtml(pickup.garage)}</strong>
-        <div>📍 ${escapeHtml(pickup.postcode)}</div>
-        <div>📝 ${escapeHtml(pickup.notes || "Brak uwag")}</div>
-        <button class="secondary" onclick="removePickup(${index})">
-          Usuń
-        </button>
-      `;
-
-      container.appendChild(div);
-    });
+  localStorage.setItem(
+    "autoBodyPickups",
+    JSON.stringify(pickups)
+  );
 }
 
 function addPickup() {
 
-  const garage = document.getElementById("garage").value.trim();
-  const postcode = document.getElementById("postcode").value.trim();
-  const time = document.getElementById("time").value;
-  const notes = document.getElementById("notes").value.trim();
+  const company =
+    document.getElementById("company").value.trim();
 
-  if (!garage || !postcode) {
-    alert("Wpisz nazwę warsztatu i postcode.");
+  const address =
+    document.getElementById("address").value.trim();
+
+  const time =
+    document.getElementById("time").value;
+
+  const notes =
+    document.getElementById("notes").value.trim();
+
+  if (!company || !address || !time) {
+    alert("Wpisz firmę, adres i godzinę odbioru.");
     return;
   }
 
-  pickups.push({
-    garage,
-    postcode,
+  const pickup = {
+    id: Date.now(),
+    company,
+    address,
     time,
     notes
-  });
+  };
+
+  pickups.push(pickup);
+
+  pickups.sort((a, b) =>
+    a.time.localeCompare(b.time)
+  );
 
   save();
   render();
 
-  document.getElementById("garage").value = "";
-  document.getElementById("postcode").value = "";
+  document.getElementById("company").value = "";
+  document.getElementById("address").value = "";
   document.getElementById("time").value = "";
   document.getElementById("notes").value = "";
 }
 
-function removePickup(index) {
-  pickups.splice(index, 1);
+function deletePickup(id) {
+
+  pickups = pickups.filter(
+    pickup => pickup.id !== id
+  );
+
   save();
   render();
 }
 
-function clearRoutes() {
+function render() {
 
-  if (confirm("Czy na pewno wyczyścić całą trasę?")) {
-    pickups = [];
-    save();
-    render();
+  const route =
+    document.getElementById("route");
+
+  if (pickups.length === 0) {
+
+    route.innerHTML = `
+      <div class="empty">
+        Brak zaplanowanych odbiorów
+      </div>
+    `;
+
+    return;
   }
-}
 
-function setDriver() {
+  route.innerHTML = pickups.map(pickup => `
 
-  const name = prompt("Podaj imię kierowcy:");
+    <div class="pickup">
 
-  if (name) {
-    localStorage.setItem("driver", name);
-    document.getElementById("driver").innerText =
-      "Kierowca: " + name;
-  }
+      <div class="pickup-top">
+        <div class="time">
+          ${pickup.time}
+        </div>
+      </div>
+
+      <div class="company">
+        📌 ${escapeHtml(pickup.company)}
+      </div>
+
+      <div class="info">
+        📍 ${escapeHtml(pickup.address)}
+      </div>
+
+      ${
+        pickup.notes
+        ? `<div class="notes">
+             📝 ${escapeHtml(pickup.notes)}
+           </div>`
+        : ""
+      }
+
+      <button
+        class="delete-btn"
+        onclick="deletePickup(${pickup.id})"
+      >
+        Usuń
+      </button>
+
+    </div>
+
+  `).join("");
 }
 
 function escapeHtml(text) {
 
   const div = document.createElement("div");
+
   div.textContent = text;
+
   return div.innerHTML;
-}
-
-const savedDriver = localStorage.getItem("driver");
-
-if (savedDriver) {
-  document.getElementById("driver").innerText =
-    "Kierowca: " + savedDriver;
 }
 
 render();

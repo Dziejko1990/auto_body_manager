@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07101d">
+<title>Auto Body Manager PRO 5.0 DRIVER LIVE</title>
+<style>
+:root{
+  --bg:#07101d; --bg2:#0b1524; --panel:#111f32; --panel2:#172941;
+  --line:#2b4160; --text:#f5f8fc; --muted:#91a5bf; --blue:#3b82f6;
+  --blue2:#2563eb; --green:#16a36b; --orange:#d88a17; --red:#dc5462;
+  --shadow:0 18px 50px rgba(0,0,0,.28); --r:24px;
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;background:linear-gradient(180deg,#07101d,#091728 45%,#07101d);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;min-height:100vh}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+.app{max-width:980px;margin:0 auto;padding:0 18px calc(110px + env(safe-area-inset-bottom))}
+.topbar{position:sticky;top:0;z-index:20;background:rgba(7,16,29,.92);backdrop-filter:blur(18px);border-bottom:1px solid rgba(80,105,140,.24);padding:calc(14px + env(safe-area-inset-top)) 0 12px}
+.top-inner{max-width:980px;margin:0 auto;padding:0 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.logo{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(145deg,#2f80ed,#1553b7);font-size:23px;box-shadow:0 10px 30px rgba(37,99,235,.25)}
+.brand h1{margin:0;font-size:18px;white-space:nowrap}.brand small{display:block;color:var(--muted);font-weight:700;font-size:11px;letter-spacing:.12em}
+.top-actions{display:flex;gap:8px}.icon-btn{border:1px solid var(--line);background:#0c1828;color:#fff;width:44px;height:44px;border-radius:14px;font-size:20px}
+.hero{padding:24px 0 12px}.hero-row{display:flex;justify-content:space-between;gap:16px;align-items:flex-end}.hero h2{margin:5px 0 2px;font-size:34px;line-height:1.04}.eyebrow{color:#70a7ff;font-size:12px;font-weight:900;letter-spacing:.22em}.date{color:var(--muted);font-weight:700}
+.primary{border:0;background:linear-gradient(135deg,var(--blue),var(--blue2));color:white;border-radius:16px;padding:14px 18px;font-weight:900;box-shadow:0 12px 30px rgba(37,99,235,.26)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0}.stat{background:linear-gradient(145deg,var(--panel),#0d1a2a);border:1px solid var(--line);border-radius:20px;padding:16px}.stat .n{font-size:30px;font-weight:950}.stat .l{color:var(--muted);font-weight:800;font-size:12px;margin-top:3px}
+.main-grid{display:grid;grid-template-columns:1.35fr .65fr;gap:16px}.panel{background:linear-gradient(160deg,var(--panel),#0c1929);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--shadow)}
+.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}.panel-head h3{margin:0;font-size:22px}.muted{color:var(--muted)}
+.route-card{background:#0a1727;border:1px solid #27405f;border-radius:20px;padding:15px;margin-top:10px;display:grid;grid-template-columns:auto 1fr;gap:14px;position:relative}
+.step{width:48px;height:48px;border-radius:15px;background:#173e70;color:#7eb3ff;display:grid;place-items:center;font-weight:950;font-size:20px}
+.card-top{display:flex;justify-content:space-between;gap:10px}.time{font-size:20px;font-weight:950;color:#72a7ff}.company{font-size:22px;font-weight:950;margin:2px 0 6px}.address{color:#c7d3e4;font-weight:750}.meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.chip{border:1px solid #36506f;background:#112239;color:#c7d6e8;border-radius:999px;padding:6px 9px;font-size:11px;font-weight:900}
+.status{border-radius:999px;padding:7px 10px;font-size:11px;font-weight:950;letter-spacing:.07em;white-space:nowrap;height:max-content}.pending{background:#633f08;color:#ffd27a}.collected{background:#113e73;color:#b9dcff}.delivered{background:#0d573a;color:#bcf4d4}.cancelled{background:#5a1d27;color:#ffbdc5}
+.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}.act{border:1px solid #315071;background:#10233a;color:#e6eef9;border-radius:12px;padding:10px 8px;font-weight:900}.act.blue{background:#153f78;border-color:#2c6fc0}.act.green{background:#124c34;border-color:#1d8054}.act.red{background:#3d1d26;border-color:#7a3441;color:#ffb1bb}
+.empty{text-align:center;padding:34px 14px;color:var(--muted)}.empty .big{font-size:42px}
+.side-list{display:grid;gap:10px}.quick{border:1px solid var(--line);background:#0b1929;border-radius:16px;padding:14px;text-align:left;color:white}.quick b{display:block;font-size:15px}.quick span{color:var(--muted);font-size:12px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}.filter{border:1px solid #38506e;background:#0d1929;color:#c0cee1;border-radius:999px;padding:9px 12px;font-weight:900}.filter.active{background:#1c65ca;color:#fff;border-color:#3d8cff}
+.search{display:grid;grid-template-columns:1fr auto;gap:8px;margin:10px 0}.search input,.field input,.field textarea,.field select{width:100%;background:#071523;color:#fff;border:1px solid #314b6a;border-radius:14px;padding:13px 14px;outline:none}.search input:focus,.field input:focus,.field textarea:focus,.field select:focus{border-color:#4a91ef;box-shadow:0 0 0 3px rgba(59,130,246,.13)}
+.views>.view{display:none}.views>.view.active{display:block}
+.bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(7,16,29,.95);backdrop-filter:blur(18px);border-top:1px solid #223a57;padding:8px 8px calc(8px + env(safe-area-inset-bottom));display:flex;justify-content:center}
+.nav-inner{width:min(980px,100%);display:grid;grid-template-columns:repeat(5,1fr);gap:4px}.nav-btn{border:0;background:transparent;color:#8095af;border-radius:14px;padding:7px 4px;font-size:11px;font-weight:850}.nav-btn .ico{display:block;font-size:22px;margin-bottom:3px}.nav-btn.active{background:#13243a;color:#78adff}
+.modal-wrap{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center}.modal-wrap.open{display:flex}.modal{width:min(760px,100%);max-height:92vh;overflow:auto;background:#0c1828;border:1px solid #2f4562;border-radius:28px 28px 0 0;padding:20px 18px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -30px 80px rgba(0,0,0,.45)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;gap:10px}.modal h3{font-size:24px;margin:0}.close{border:0;background:#192b42;color:white;width:40px;height:40px;border-radius:13px;font-size:22px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}.field{display:grid;gap:7px;font-weight:850;color:#d3deec}.field.full{grid-column:1/-1}.field textarea{min-height:94px;resize:vertical}.form-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}.secondary{border:1px solid #34506e;background:#13253c;color:white;border-radius:14px;padding:13px;font-weight:900}.danger{border:1px solid #843b48;background:#421f27;color:#ffc1c8;border-radius:14px;padding:13px;font-weight:900}
+.table-list{display:grid;gap:10px}.record{border:1px solid #2b435f;background:#0b1828;border-radius:18px;padding:14px}.record-row{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.record h4{margin:0 0 4px;font-size:18px}.record small{color:var(--muted)}
+.driver-overlay{position:fixed;inset:0;z-index:60;background:#07101d;display:none;overflow:auto;padding:calc(18px + env(safe-area-inset-top)) 16px calc(30px + env(safe-area-inset-bottom))}.driver-overlay.open{display:block}.driver-shell{max-width:760px;margin:auto}.driver-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.driver-next{margin-top:18px;background:linear-gradient(160deg,#0f2137,#091627);border:1px solid #35516f;border-radius:28px;padding:20px}.driver-company{font-size:32px;font-weight:950;margin:8px 0}.driver-address{font-size:20px;color:#c6d5e8}.driver-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}.driver-actions button{min-height:70px;border-radius:18px;border:0;font-weight:950;font-size:18px}.mapbtn{background:#246bd8;color:white}.donebtn{background:#16845a;color:white}.callbtn{background:#18314e;color:white}.skipbtn{background:#273449;color:white}
+.kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.kpi{border:1px solid #2c4563;background:#0d1c2e;border-radius:16px;padding:13px}.kpi b{font-size:22px}.kpi span{display:block;color:var(--muted);font-size:11px;font-weight:800}
+.setting{border:1px solid #2d4563;background:#0b1929;border-radius:16px;padding:14px;margin:10px 0}.setting h4{margin:0 0 6px}.setting p{margin:0 0 12px;color:var(--muted);font-size:13px}
+.toast{position:fixed;left:50%;bottom:105px;transform:translateX(-50%);z-index:80;background:#18283d;color:#fff;border:1px solid #365270;border-radius:999px;padding:10px 16px;font-weight:850;display:none}.toast.show{display:block}
+@media(max-width:760px){.main-grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.hero h2{font-size:30px}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.actions{grid-template-columns:1fr 1fr}.top-actions .icon-btn:nth-child(2){display:none}.search{grid-template-columns:1fr}.kpi-row{grid-template-columns:1fr 1fr 1fr}}
+
+.more-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.module{border:1px solid #2e4868;background:linear-gradient(160deg,#0e1d30,#0a1625);border-radius:20px;padding:18px;text-align:left;color:#fff}.module .mi{font-size:30px}.module b{display:block;font-size:18px;margin:8px 0 4px}.module span{color:var(--muted);font-size:12px}
+.badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 9px;background:#122943;border:1px solid #355476;color:#d4e5fb;font-size:11px;font-weight:900}
+.money{font-size:28px;font-weight:950}.report-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}.report-box{background:#0b1929;border:1px solid #2d4664;border-radius:17px;padding:14px}.report-box b{font-size:24px}.report-box span{display:block;color:var(--muted);font-size:11px;font-weight:800;margin-top:3px}
+.progress{height:10px;background:#071321;border-radius:999px;overflow:hidden;border:1px solid #263e5a}.progress>i{display:block;height:100%;background:linear-gradient(90deg,#2f7de0,#54a3ff);border-radius:999px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:12px}.mini-card{border:1px solid #2e4765;background:#0b1928;border-radius:18px;padding:14px}.mini-card h4{margin:0 0 6px}.mini-card p{margin:0;color:var(--muted);font-size:12px}
+.photo-strip{display:flex;gap:8px;overflow:auto;margin-top:10px}.photo-thumb{width:74px;height:74px;flex:0 0 auto;border-radius:12px;object-fit:cover;border:1px solid #385573;background:#0b1726}
+.signature-preview{width:100%;max-width:320px;height:120px;object-fit:contain;background:#fff;border-radius:12px;margin-top:8px}
+.canvas-wrap{background:#fff;border-radius:14px;padding:8px}.canvas-wrap canvas{width:100%;height:180px;display:block;touch-action:none}
+.notice{border:1px solid #4c5f78;background:#111d2e;border-radius:16px;padding:13px;color:#cbd7e7;font-size:13px}
+@media(max-width:760px){.report-grid{grid-template-columns:1fr 1fr}.split{grid-template-columns:1fr}.more-grid{grid-template-columns:1fr 1fr}}
+
+
+.cloud-pill{display:inline-flex;align-items:center;gap:7px;border:1px solid #35506d;background:#0d1c2d;border-radius:999px;padding:8px 10px;color:#b9cbe0;font-size:11px;font-weight:900}
+.cloud-dot{width:8px;height:8px;border-radius:50%;background:#66788e}
+.cloud-dot.on{background:#22c983;box-shadow:0 0 0 4px rgba(34,201,131,.12)}
+.cloud-dot.busy{background:#f0a428}
+.auth-card{border:1px solid #31506f;background:linear-gradient(160deg,#0c1c2f,#091625);border-radius:22px;padding:18px;margin-bottom:14px}
+.auth-card h4{margin:0 0 6px;font-size:20px}.auth-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.auth-grid .full{grid-column:1/-1}
+.sync-panel{border:1px solid #31506f;background:#0a1929;border-radius:18px;padding:15px}.sync-row{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.user-badge{display:flex;align-items:center;gap:10px}.avatar{width:42px;height:42px;border-radius:14px;background:#184174;display:grid;place-items:center;font-weight:950}
+@media(max-width:760px){.auth-grid{grid-template-columns:1fr}.auth-grid .full{grid-column:auto}.cloud-pill{padding:7px 8px}}
+
+
+.team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.person{border:1px solid #2f4b69;background:#0b1929;border-radius:18px;padding:15px}.person-top{display:flex;align-items:center;gap:11px}.person-avatar{width:46px;height:46px;border-radius:15px;background:#173d69;display:grid;place-items:center;font-size:22px}.person h4{margin:0}.person small{color:var(--muted)}.role{display:inline-flex;margin-top:10px;border:1px solid #3c5a79;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:900}.role.owner{background:#35270b}.role.admin{background:#142d55}.role.driver{background:#0e3828}.role.worker{background:#2c243e}.activity{border-left:2px solid #2c4d70;padding-left:13px;margin:12px 0}.activity b{display:block}.activity small{color:var(--muted)}.assignment{border:1px dashed #385573;border-radius:14px;padding:10px 12px;margin-top:10px}.team-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.team-kpi{background:#0b1929;border:1px solid #2c4664;border-radius:16px;padding:13px}.team-kpi b{font-size:23px}.team-kpi span{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+@media(max-width:760px){.team-grid{grid-template-columns:1fr}.team-kpis{grid-template-columns:1fr 1fr}}
+
+.live-badge{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:7px 10px;background:#0b2b22;border:1px solid #1d6f54;color:#b9f6df;font-size:11px;font-weight:950}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#2ee59d;box-shadow:0 0 0 5px rgba(46,229,157,.10)}
+.driver-focus{border:1px solid #2f6c57;background:linear-gradient(160deg,#0c2a22,#0a1818);border-radius:22px;padding:18px}
+.driver-focus h3{margin:0 0 6px}.driver-focus .bigstate{font-size:34px;font-weight:950;margin:8px 0}
+.map-box{border:1px solid #2f4b69;border-radius:18px;background:#0a1726;min-height:180px;padding:14px}
+.location-row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid #20364f}.location-row:last-child{border-bottom:0}
+.invite-box{border:1px dashed #4e6a88;background:#0c1a2b;border-radius:18px;padding:15px}.invite-code{font-size:28px;font-weight:950;letter-spacing:3px}
+.mode-driver .owner-only{display:none!important}.mode-driver .driver-only{display:block!important}.driver-only{display:none}
+@media(max-width:760px){.invite-code{font-size:23px}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="top-inner">
+    <div class="brand"><div class="logo">🚚</div><div><small>AUTO BODY MANAGER</small><h1>PRO 5.0 LIVE</h1></div></div>
+    <div class="top-actions"><div class="cloud-pill" id="cloudPill"><span class="cloud-dot" id="cloudDot"></span><span id="cloudText">Lokalnie</span></div><button class="icon-btn" id="accountTop" title="Konto">👤</button><button class="icon-btn" id="driverModeTop" title="Tryb kierowcy">🛣️</button><button class="icon-btn" id="quickAddTop" title="Nowe zlecenie">＋</button></div>
+  </div>
+</header>
+
+<main class="app">
+  <section class="hero">
+    <div class="hero-row">
+      <div><div class="eyebrow" id="viewEyebrow">CENTRUM DOWODZENIA</div><h2 id="viewTitle">Dzień kierowcy</h2><div class="date" id="todayLabel"></div></div>
+      <button class="primary" id="newOrderBtn">＋ Nowe zlecenie</button>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="n" id="statAll">0</div><div class="l">Punkty dzisiaj</div></div>
+      <div class="stat"><div class="n" id="statPending">0</div><div class="l">Do odbioru</div></div>
+      <div class="stat"><div class="n" id="statCollected">0</div><div class="l">W aucie</div></div>
+      <div class="stat"><div class="n" id="statDone">0</div><div class="l">Dostarczone</div></div>
+    </div>
+  </section>
+
+  <div class="views">
+    <section class="view active" data-view="dashboard">
+      <div class="main-grid">
+        <section class="panel">
+          <div class="panel-head"><div><div class="eyebrow">NAJBLIŻSZE</div><h3>Dzisiejsza trasa</h3></div><button class="secondary" id="openDriverBtn">🚚 Tryb kierowcy</button></div>
+          <div id="dashboardRoute"></div>
+        </section>
+        <aside class="panel">
+          <div class="panel-head"><h3>Szybkie akcje</h3></div>
+          <div class="side-list">
+            <button class="quick" id="addTomorrow"><b>🌙 Zaplanuj jutro</b><span>Dodaj odbiór od razu na jutro</span></button>
+            <button class="quick" data-go="route"><b>🗺️ Pełna trasa</b><span>Filtry, kolejność i nawigacja</span></button>
+            <button class="quick" data-go="workshops"><b>🏭 Warsztaty</b><span>Baza firm i szybkie odbiory</span></button>
+            <button class="quick" data-go="history"><b>🧾 Historia</b><span>Zakończone odbiory i dostawy</span></button>
+            <button class="quick" data-go="settings"><b>💾 Kopia danych</b><span>Eksport i import</span></button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="view" data-view="route">
+      <section class="panel">
+        <div class="panel-head"><div><div class="eyebrow">TRASA</div><h3>Zlecenia kierowcy</h3></div><button class="primary" id="newRouteOrder">＋ Dodaj</button></div>
+        <div class="toolbar" id="dayFilters">
+          <button class="filter active" data-day="today">Dzisiaj</button><button class="filter" data-day="tomorrow">Jutro</button><button class="filter" data-day="all">Wszystkie dni</button>
+        </div>
+        <div class="toolbar" id="statusFilters">
+          <button class="filter active" data-status="all">Wszystkie</button><button class="filter" data-status="pending">Do odbioru</button><button class="filter" data-status="collected">Odebrane</button><button class="filter" data-status="delivered">Dostarczone</button><button class="filter" data-status="cancelled">Anulowane</button>
+        </div>
+        <div class="search"><input id="routeSearch" placeholder="Szukaj firmy, adresu, telefonu, rejestracji..."><button class="secondary" id="openFullRoute">🗺️ Otwórz trasę</button></div>
+        <div id="routeList"></div>
+      </section>
+    </section>
+
+    <section class="view" data-view="orders">
+      <section class="panel">
+        <div class="panel-head"><div><div class="eyebrow">BAZA</div><h3>Wszystkie zlecenia</h3></div><button class="primary" id="newOrderOrders">＋ Nowe</button></div>
+        <div class="search"><input id="ordersSearch" placeholder="Szukaj po firmie, adresie, rejestracji, częściach..."><button class="secondary" id="clearOrdersSearch">Wyczyść</button></div>
+        <div class="table-list" id="ordersList"></div>
+      </section>
+    </section>
+
+    <section class="view" data-view="workshops">
+      <section class="panel">
+        <div class="panel-head"><div><div class="eyebrow">KONTAKTY</div><h3>Warsztaty i firmy</h3></div><button class="primary" id="addWorkshopBtn">＋ Warsztat</button></div>
+        <div class="search"><input id="workshopSearch" placeholder="Szukaj warsztatu lub adresu"><button class="secondary" id="clearWorkshopSearch">Wyczyść</button></div>
+        <div class="table-list" id="workshopsList"></div>
+      </section>
+    </section>
+
+    <section class="view" data-view="history">
+      <section class="panel">
+        <div class="panel-head"><div><div class="eyebrow">ARCHIWUM</div><h3>Historia pracy</h3></div></div>
+        <div class="kpi-row"><div class="kpi"><b id="histDelivered">0</b><span>Dostarczone</span></div><div class="kpi"><b id="histParts">0</b><span>Części</span></div><div class="kpi"><b id="histCompanies">0</b><span>Firmy</span></div></div>
+        <div class="search"><input id="historySearch" placeholder="Szukaj w historii"><button class="secondary" id="clearHistorySearch">Wyczyść</button></div>
+        <div class="table-list" id="historyList"></div>
+      </section>
+    </section>
+
+
+    <section class="view" data-view="inventory">
+      <section class="panel">
+        <div class="panel-head"><div><div class="eyebrow">MAGAZYN</div><h3>Części w obiegu</h3></div><button class="primary" id="newInventoryBtn">＋ Dodaj część</button></div>
+        <div class="report-grid">
+          <div class="report-box"><b id="invAll">0</b><span>Wszystkie pozycje</span></div>
+          <div class="report-box"><b id="invVehicle">0</b><span>W aucie</span></div>
+          <div class="report-box"><b id="invDelivered">0</b><span>Dostarczone</span></div>
+          <div class="report-box"><b id="invValue">£0</b><span>Wartość</span></div>
+        </div>
+        <div class="search"><input id="inventorySearch" placeholder="Szukaj części, zlecenia lub rejestracji"><button class="secondary" id="clearInventorySearch">Wyczyść</button></div>
+        <div class="table-list" id="inventoryList"></div>
+      </section>
+    </section>
+
+    <section class="view" data-view="customers">
+      <section class="panel">
+        <div class="panel-head"><div><div class="eyebrow">KLIENCI</div><h3>Klienci i samochody</h3></div></div>
+        <div class="search"><input id="customerSearch" placeholder="Szukaj klienta, auta lub rejestracji"><button class="secondary" id="clearCustomerSearch">Wyczyść</button></div>
+        <div class="table-list" id="customersList"></div>
+      </section>
+    </section>
+
+    <section class="view" data-view="expenses">
+      <section class="panel">
+        <div class="panel-head"><div><div class="eyebrow">KOSZTY</div><h3>Wydatki i paliwo</h3></div><button class="primary" id="newExpenseBtn">＋ Wydatek</button></div>
+        <div class="report-grid">
+          <div class="report-box"><b id="expToday">£0</b><span>Dzisiaj</span></div>
+          <div class="report-box"><b id="expMonth">£0</b><span>Ten miesiąc</span></div>
+          <div class="report-box"><b id="expFuel">£0</b><span>Paliwo</span></div>
+          <div class="report-box"><b id="expOther">£0</b><span>Inne</span></div>
+        </div>
+        <div class="table-list" id="expensesList"></div>
+      </section>
+    </section>
+
+    <section class="view" data-view="reports">
+      <section class="panel">
+        <div class="panel-head"><div><div class="eyebrow">RAPORTY</div><h3>Podsumowanie pracy</h3></div></div>
+        <div class="toolbar"><button class="filter active" data-report="today">Dzisiaj</button><button class="filter" data-report="week">7 dni</button><button class="filter" data-report="month">30 dni</button></div>
+        <div class="report-grid">
+          <div class="report-box"><b id="repJobs">0</b><span>Zlecenia</span></div>
+          <div class="report-box"><b id="repDelivered">0</b><span>Dostarczone</span></div>
+          <div class="report-box"><b id="repParts">0</b><span>Części</span></div>
+          <div class="report-box"><b id="repExpenses">£0</b><span>Koszty</span></div>
+        </div>
+        <div class="split">
+          <div class="mini-card"><h4>Skuteczność</h4><p id="repRateText">0% zakończonych zleceń</p><div class="progress" style="margin-top:12px"><i id="repRateBar" style="width:0%"></i></div></div>
+          <div class="mini-card"><h4>Najczęstszy warsztat</h4><p id="repTopWorkshop">Brak danych</p></div>
+        </div>
+        <div class="table-list" id="reportsList" style="margin-top:14px"></div>
+      </section>
+    </section>
+
+    <section class="view" data-view="more">
+      <section class="panel">
+        <div class="panel-head"><div><div class="eyebrow">AUTO BODY MANAGER PRO</div><h3>Więcej modułów</h3></div></div>
+        <div class="more-grid">
+          <button class="module" data-go="inventory"><span class="mi">📦</span><b>Magazyn części</b><span>Co jest w aucie, co odebrane i co dostarczone.</span></button>
+          <button class="module" data-go="customers"><span class="mi">👥</span><b>Klienci i auta</b><span>Historia samochodów, rejestracji i zleceń.</span></button>
+          <button class="module" data-go="expenses"><span class="mi">💷</span><b>Koszty</b><span>Paliwo, parking, zakupy i inne wydatki.</span></button>
+          <button class="module" data-go="reports"><span class="mi">📊</span><b>Raporty</b><span>Dzień, tydzień i miesiąc w liczbach.</span></button>
+          <button class="module" data-go="history"><span class="mi">🧾</span><b>Historia</b><span>Pełne archiwum dostarczonych zleceń.</span></button>
+          <button class="module" data-go="driverlive"><span class="mi">📡</span><b>Driver Live</b><span>Moje zlecenia, start trasy, lokalizacja i status na żywo.</span></button>
+          <button class="module" data-go="team"><span class="mi">👨‍🔧</span><b>Zespół</b><span>Kierowcy, role, przydziały i aktywność pracowników.</span></button>
+          <button class="module" data-go="cloud"><span class="mi">☁️</span><b>Konto i synchronizacja</b><span>Logowanie, chmura i synchronizacja między telefonami.</span></button>
+          <button class="module" data-go="settings"><span class="mi">⚙️</span><b>Ustawienia</b><span>Kopia danych, kierowca i import.</span></button>
+        </div>
+      </section>
+    </section>
+
+
+
+
+    <section class="view driver-only" data-view="driverlive">
+      <section class="panel">
+        <div class="panel-head"><div><div class="eyebrow">DRIVER LIVE</div><h3>Moja trasa</h3></div><span class="live-badge"><span class="live-dot"></span>SYNC LIVE</span></div>
+        <div class="driver-focus">
+          <div class="muted">Status dnia</div>
+          <div class="bigstate" id="driverDayState">Gotowy</div>
+          <div class="muted" id="driverDayInfo">Uruchom trasę, aby rozpocząć pracę.</div>
+          <div class="actions" style="margin-top:14px">
+            <button class="primary" id="startDayBtn">▶ Rozpocznij trasę</button>
+            <button class="secondary" id="stopDayBtn">■ Zakończ dzień</button>
+            <button class="secondary" id="shareLocationBtn">📍 Udostępnij lokalizację</button>
+          </div>
+        </div>
+        <div class="team-kpis" style="margin-top:14px">
+          <div class="team-kpi"><b id="myJobsCount">0</b><span>Moje zlecenia</span></div>
+          <div class="team-kpi"><b id="myPendingCount">0</b><span>Do odbioru</span></div>
+          <div class="team-kpi"><b id="myCollectedCount">0</b><span>W aucie</span></div>
+          <div class="team-kpi"><b id="myDoneCount">0</b><span>Dostarczone</span></div>
+        </div>
+        <div id="myJobsList" style="margin-top:14px"></div>
+      </section>
+    </section>
+
+    <section class="view" data-view="team">
+      <section class="panel">
+        <div class="panel-head"><div><div class="eyebrow">PRO 4.0 TEAM</div><h3>Zespół i przydziały</h3></div><button class="primary" id="addTeamBtn">＋ Pracownik</button></div>
+        <div class="team-kpis">
+          <div class="team-kpi"><b id="teamCount">0</b><span>Osoby</span></div>
+          <div class="team-kpi"><b id="teamDrivers">0</b><span>Kierowcy</span></div>
+          <div class="team-kpi"><b id="teamAssigned">0</b><span>Przydzielone dziś</span></div>
+          <div class="team-kpi"><b id="teamDone">0</b><span>Zakończone dziś</span></div>
+        </div>
+        <div class="team-grid" id="teamList" style="margin-top:14px"></div>
+        <div class="invite-box owner-only" style="margin-top:14px">
+          <div class="eyebrow">KOD ZESPOŁU</div>
+          <div class="invite-code" id="inviteCode">--------</div>
+          <div class="muted">Nowy kierowca zakłada konto i wpisuje ten kod, aby dołączyć do Twojej firmy.</div>
+          <div class="actions"><button class="act" id="copyInviteBtn">📋 Kopiuj kod</button></div>
+        </div>
+      </section>
+      <section class="panel">
+        <div class="panel-head"><div><div class="eyebrow">LIVE</div><h3>Lokalizacje kierowców</h3></div><span class="live-badge"><span class="live-dot"></span>NA ŻYWO</span></div>
+        <div class="map-box" id="liveLocations"><div class="empty">Brak aktywnych lokalizacji.</div></div>
+      </section>
+      <section class="panel">
+        <div class="panel-head"><div><div class="eyebrow">AKTYWNOŚĆ</div><h3>Kto co zrobił</h3></div></div>
+        <div id="teamActivity"></div>
+      </section>
+    </section>
+
+    <section class="view" data-view="cloud">
+      <section class="panel">
+        <div class="panel-head"><div><div class="eyebrow">CHMURA</div><h3>Konto i synchronizacja</h3></div></div>
+        <div id="signedOutBox" class="auth-card">
+          <h4>☁️ Zaloguj się do Auto Body Manager</h4>
+          <p class="muted">Po zalogowaniu dane mogą być synchronizowane między Twoimi urządzeniami.</p>
+          <div class="auth-grid">
+            <label class="field full">E-mail<input id="authEmail" type="email" autocomplete="email" placeholder="twoj@email.com"></label>
+            <label class="field full">Hasło<input id="authPassword" type="password" autocomplete="current-password" placeholder="minimum 6 znaków"></label>
+            <button class="primary" id="loginBtn">Zaloguj</button>
+            <button class="secondary" id="signupBtn">Załóż konto</button>
+          </div>
+          <p class="muted" style="font-size:12px;margin-bottom:0">Przy pierwszej rejestracji może być wymagane potwierdzenie e-mail.</p>
+        </div>
+
+        <div id="signedInBox" class="auth-card" style="display:none">
+          <div class="sync-row">
+            <div class="user-badge"><div class="avatar">👤</div><div><b id="cloudUserEmail">—</b><div class="muted" id="workspaceName">Auto Body Manager</div></div></div>
+            <button class="secondary" id="logoutBtn">Wyloguj</button>
+          </div>
+        </div>
+
+        <div class="sync-panel driver-only" style="margin-bottom:14px">
+          <div><b>Dołącz do firmy jako kierowca</b><div class="muted">Wpisz kod otrzymany od właściciela.</div></div>
+          <div class="auth-grid" style="margin-top:10px">
+            <label class="field">Kod zespołu<input id="joinCode" maxlength="8" placeholder="AB12CD34"></label>
+            <label class="field">Telefon<input id="joinPhone" inputmode="tel"></label>
+            <button class="primary" id="joinTeamBtn">Dołącz do zespołu</button>
+          </div>
+        </div>
+        <div class="sync-panel">
+          <div class="sync-row"><div><b>Synchronizacja danych</b><div class="muted" id="lastSyncText">Jeszcze nie synchronizowano.</div></div><button class="primary" id="syncNowBtn">↻ Synchronizuj teraz</button></div>
+          <div class="notice" style="margin-top:12px">Aplikacja nadal zapisuje dane lokalnie. Gdy jesteś zalogowany i masz internet, kopia trafia również do chmury.</div>
+        </div>
+      </section>
+    </section>
+
+    <section class="view" data-view="settings">
+      <section class="panel">
+        <div class="panel-head"><div><div class="eyebrow">SYSTEM</div><h3>Ustawienia i dane</h3></div></div>
+        <div class="setting"><h4>👤 Kierowca</h4><p>Nazwa wyświetlana w aplikacji.</p><div class="search"><input id="driverNameInput" placeholder="np. Andrzej"><button class="secondary" id="saveDriverName">Zapisz</button></div></div>
+        <div class="setting"><h4>💾 Kopia zapasowa</h4><p>Pobierz wszystkie zlecenia i ustawienia jako plik JSON.</p><button class="secondary" id="exportBtn">Pobierz kopię danych</button></div>
+        <div class="setting"><h4>📥 Przywracanie danych</h4><p>Wczytaj kopię JSON z wcześniejszego telefonu lub wersji.</p><input id="importInput" type="file" accept=".json,application/json" hidden><button class="secondary" id="importBtn">Wczytaj kopię</button></div>
+        <div class="setting"><h4>📤 Udostępnij dzisiejszą trasę</h4><p>Wyślij tekstową listę punktów przez system udostępniania iPhone.</p><button class="secondary" id="shareBtn">Udostępnij trasę</button></div>
+        <div class="setting"><h4>🧹 Dane</h4><p>Nie usuwaj bez potrzeby. Kopia starego indexu na GitHubie nadal zostaje.</p><button class="danger" id="clearDataBtn">Usuń wszystkie dane lokalne</button></div>
+      </section>
+    </section>
+  </div>
+</main>
+
+<nav class="bottom-nav"><div class="nav-inner">
+  <button class="nav-btn active" data-nav="dashboard"><span class="ico">🏠</span>Dzisiaj</button>
+  <button class="nav-btn" data-nav="route"><span class="ico">🗺️</span>Trasa</button>
+  <button class="nav-btn" data-nav="orders"><span class="ico">📋</span>Zlecenia</button>
+  <button class="nav-btn" data-nav="workshops"><span class="ico">🏭</span>Warsztaty</button>
+  <button class="nav-btn" data-nav="more"><span class="ico">☰</span>Więcej</button>
+</div></nav>
+
+<div class="modal-wrap" id="orderModal"><div class="modal">
+  <div class="modal-head"><div><div class="eyebrow">ZLECENIE</div><h3 id="orderModalTitle">Nowy odbiór</h3></div><button class="close" data-close="orderModal">×</button></div>
+  <form id="orderForm">
+    <input id="editId" type="hidden">
+    <div class="form-grid">
+      <label class="field">Warsztat / firma<input id="company" required placeholder="np. OC Motor"></label>
+      <label class="field">Telefon<input id="phone" inputmode="tel" placeholder="np. 07700 900123"></label>
+      <label class="field full">Adres / postcode<input id="address" required placeholder="np. WA3 3BT"></label>
+      <label class="field">Data<input id="pickupDate" type="date" required></label>
+      <label class="field">Godzina<input id="time" type="time"></label>
+      <label class="field">Klient<input id="customer" placeholder="np. John Smith"></label>
+      <label class="field">Telefon klienta<input id="customerPhone" inputmode="tel"></label>
+      <label class="field">Rejestracja auta<input id="reg" placeholder="np. WA33 BT"></label>
+      <label class="field">Marka / model<input id="vehicle" placeholder="np. Ford Mondeo"></label>
+      <label class="field">Ilość części<input id="quantity" type="number" min="0" inputmode="numeric" placeholder="np. 5"></label>
+      <label class="field">Nr zlecenia / faktury<input id="jobNo" placeholder="np. JOB-1524"></label>
+      <label class="field">Wartość zlecenia £<input id="jobValue" type="number" step="0.01" min="0" inputmode="decimal"></label><label class="field">Przypisz do<select id="assignedTo"><option value="">Nieprzypisane</option></select></label>
+      <label class="field full">Co odbierasz?<input id="items" placeholder="np. zderzak, drzwi, błotnik"></label>
+      <label class="field full">Zdjęcia zlecenia<input id="orderPhotos" type="file" accept="image/*" multiple><span class="muted" style="font-size:12px">Do 3 zdjęć, automatycznie zmniejszanych.</span><div class="photo-strip" id="photoPreview"></div></label>
+      <label class="field full">Podpis odbiorcy<div class="canvas-wrap"><canvas id="signatureCanvas" width="700" height="240"></canvas></div><div class="toolbar"><button class="secondary" type="button" id="clearSignature">Wyczyść podpis</button></div></label>
+      <label class="field full">Uwagi<textarea id="notes" placeholder="np. zapytać o fakturę, odbiór z tylnej bramy"></textarea></label>
+      <label class="field">Status<select id="status"><option value="pending">Do odbioru</option><option value="collected">Odebrane</option><option value="delivered">Dostarczone</option><option value="cancelled">Anulowane</option></select></label>
+    </div>
+    <div class="form-actions"><button class="secondary" type="button" data-close="orderModal">Anuluj</button><button class="primary" type="submit">Zapisz zlecenie</button></div>
+  </form>
+</div></div>
+
+<div class="modal-wrap" id="workshopModal"><div class="modal">
+  <div class="modal-head"><div><div class="eyebrow">WARSZTAT</div><h3>Dodaj firmę</h3></div><button class="close" data-close="workshopModal">×</button></div>
+  <form id="workshopForm">
+    <div class="form-grid">
+      <label class="field">Nazwa<input id="wName" required placeholder="np. OC Motor"></label>
+      <label class="field">Telefon<input id="wPhone" inputmode="tel"></label>
+      <label class="field full">Adres / postcode<input id="wAddress" required></label>
+      <label class="field full">Uwagi<textarea id="wNotes"></textarea></label>
+    </div>
+    <div class="form-actions"><button class="secondary" type="button" data-close="workshopModal">Anuluj</button><button class="primary" type="submit">Zapisz warsztat</button></div>
+  </form>
+</div></div>
+
+
+
+<div class="modal-wrap" id="teamModal"><div class="modal">
+  <div class="modal-head"><div><div class="eyebrow">ZESPÓŁ</div><h3>Dodaj pracownika</h3></div><button class="close" data-close="teamModal">×</button></div>
+  <form id="teamForm">
+    <div class="form-grid">
+      <label class="field">Imię i nazwisko<input id="teamName" required placeholder="np. Marek Kowalski"></label>
+      <label class="field">E-mail<input id="teamEmail" type="email" placeholder="marek@email.com"></label>
+      <label class="field">Telefon<input id="teamPhone" inputmode="tel"></label>
+      <label class="field">Rola<select id="teamRole"><option value="driver">Kierowca</option><option value="worker">Pracownik</option><option value="admin">Administrator</option></select></label>
+    </div>
+    <div class="form-actions"><button class="secondary" type="button" data-close="teamModal">Anuluj</button><button class="primary" type="submit">Dodaj do zespołu</button></div>
+  </form>
+</div></div>
+
+<div class="modal-wrap" id="inventoryModal"><div class="modal">
+  <div class="modal-head"><div><div class="eyebrow">MAGAZYN</div><h3>Nowa część</h3></div><button class="close" data-close="inventoryModal">×</button></div>
+  <form id="inventoryForm">
+    <div class="form-grid">
+      <label class="field">Nazwa części<input id="invName" required placeholder="np. zderzak przedni"></label>
+      <label class="field">Ilość<input id="invQty" type="number" min="1" value="1"></label>
+      <label class="field">Nr zlecenia<input id="invJob" placeholder="np. JOB-1524"></label>
+      <label class="field">Rejestracja<input id="invReg" placeholder="np. WA33 BT"></label>
+      <label class="field">Wartość £<input id="invPrice" type="number" min="0" step="0.01"></label>
+      <label class="field">Status<select id="invStatus"><option value="vehicle">W aucie</option><option value="workshop">W warsztacie</option><option value="delivered">Dostarczone</option></select></label>
+      <label class="field full">Uwagi<textarea id="invNotes"></textarea></label>
+    </div>
+    <div class="form-actions"><button class="secondary" type="button" data-close="inventoryModal">Anuluj</button><button class="primary" type="submit">Zapisz</button></div>
+  </form>
+</div></div>
+
+<div class="modal-wrap" id="expenseModal"><div class="modal">
+  <div class="modal-head"><div><div class="eyebrow">KOSZTY</div><h3>Nowy wydatek</h3></div><button class="close" data-close="expenseModal">×</button></div>
+  <form id="expenseForm">
+    <div class="form-grid">
+      <label class="field">Data<input id="expDate" type="date" required></label>
+      <label class="field">Kategoria<select id="expCategory"><option value="fuel">Paliwo</option><option value="parking">Parking</option><option value="parts">Zakup części</option><option value="other">Inne</option></select></label>
+      <label class="field">Kwota £<input id="expAmount" type="number" min="0" step="0.01" required></label>
+      <label class="field">Nr zlecenia<input id="expJob"></label>
+      <label class="field full">Opis<input id="expNote" placeholder="np. Tesco fuel"></label>
+    </div>
+    <div class="form-actions"><button class="secondary" type="button" data-close="expenseModal">Anuluj</button><button class="primary" type="submit">Zapisz wydatek</button></div>
+  </form>
+</div></div>
+
+<div class="driver-overlay" id="driverOverlay">
+  <div class="driver-shell">
+    <div class="driver-head"><div><div class="eyebrow">TRYB KIEROWCY</div><h2 style="margin:4px 0">Następny punkt</h2></div><button class="close" id="closeDriver">×</button></div>
+    <div class="driver-next" id="driverCard"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const SUPABASE_URL='https://fvnaleivmqsrinkzflkb.supabase.co';
+const SUPABASE_KEY='sb_publishable_NGBeULF1jwaLLJNFccDBXg_fe7Lhe4g';
+const sb=(window.supabase&&window.supabase.createClient)?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
+let cloudUser=null, cloudWorkspace=null, cloudBusy=false;
+let activityLog=[];
+let currentMembership=null, liveChannel=null, geoWatchId=null, driverDayStarted=false;
+const STORAGE_KEY='autoBodyManagerV3';
+const META_KEY='autoBodyManagerProMeta';
+const PRO_KEY='autoBodyManagerPro2';
+const LEGACY_KEYS=['autoBodyManagerV2','autoBodyPickups','pickups'];
+
+let pickups=loadPickups();
+let meta=loadMeta();
+let pro=loadPro();
+let routeDay='today', routeStatus='all', routeSearch='', ordersSearch='', workshopSearch='', historySearch='', inventorySearch='', customerSearch='', reportRange='today';
+let pendingPhotos=[], signatureChanged=false;
+
+function uid(){return (crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2))}
+function isoDate(d=new Date()){const x=new Date(d);x.setMinutes(x.getMinutes()-x.getTimezoneOffset());return x.toISOString().slice(0,10)}
+function tomorrowIso(){const d=new Date();d.setDate(d.getDate()+1);return isoDate(d)}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function money(v){return '£'+(Number(v||0)).toFixed(2)}
+function normalize(p={}){
+  return {id:p.id||uid(),company:p.company||'',address:p.address||'',phone:p.phone||'',pickupDate:p.pickupDate||isoDate(),time:p.time||'',quantity:Number(p.quantity||0)||0,items:p.items||'',notes:p.notes||'',reg:p.reg||p.registration||'',vehicle:p.vehicle||'',jobNo:p.jobNo||'',customer:p.customer||'',customerPhone:p.customerPhone||'',jobValue:Number(p.jobValue||0)||0,photos:Array.isArray(p.photos)?p.photos.slice(0,3):[],signature:p.signature||'',status:['pending','collected','delivered','cancelled'].includes(p.status)?p.status:(p.status==='done'?'delivered':'pending'),createdAt:p.createdAt||Date.now(),collectedAt:p.collectedAt||null,completedAt:p.completedAt||null,assignedTo:p.assignedTo||'',assignedName:p.assignedName||''}
+}
+function loadPickups(){try{let raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');if(Array.isArray(raw))return raw.map(normalize);for(const k of LEGACY_KEYS){raw=JSON.parse(localStorage.getItem(k)||'null');if(Array.isArray(raw)){const m=raw.map(normalize);localStorage.setItem(STORAGE_KEY,JSON.stringify(m));return m}}}catch(_){}return []}
+function loadMeta(){try{const m=JSON.parse(localStorage.getItem(META_KEY)||'{}');return {workshops:Array.isArray(m.workshops)?m.workshops:[],driverName:m.driverName||localStorage.getItem('driverName')||localStorage.getItem('driver')||'Kierowca'}}catch(_){return {workshops:[],driverName:'Kierowca'}}}
+function loadPro(){try{const p=JSON.parse(localStorage.getItem(PRO_KEY)||'{}');return {inventory:Array.isArray(p.inventory)?p.inventory:[],expenses:Array.isArray(p.expenses)?p.expenses:[],team:Array.isArray(p.team)?p.team:[],activity:Array.isArray(p.activity)?p.activity:[]}}catch(_){return {inventory:[],expenses:[],team:[],activity:[]}}}
+let cloudTimer=null;
+function save(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(pickups));localStorage.setItem(META_KEY,JSON.stringify(meta));localStorage.setItem(PRO_KEY,JSON.stringify(pro));if(cloudUser){clearTimeout(cloudTimer);cloudTimer=setTimeout(()=>syncCloud(true),900)}}catch(e){alert('Pamięć przeglądarki jest prawie pełna. Usuń część zdjęć albo pobierz kopię danych.');}}
+function toast(msg){$('toast').textContent=msg;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),1800)}
+function statusText(s){return s==='pending'?'DO ODBIORU':s==='collected'?'ODEBRANE':s==='delivered'?'DOSTARCZONE':'ANULOWANE'}
+function todayItems(){return pickups.filter(p=>p.pickupDate===isoDate()&&p.status!=='cancelled')}
+function routeFiltered(){const day=routeDay==='today'?isoDate():routeDay==='tomorrow'?tomorrowIso():null,q=routeSearch.trim().toLowerCase();return pickups.filter(p=>(!day||p.pickupDate===day)&&(routeStatus==='all'||p.status===routeStatus)&&(!q||[p.company,p.address,p.phone,p.reg,p.vehicle,p.items,p.jobNo,p.customer].some(v=>String(v||'').toLowerCase().includes(q)))).sort((a,b)=>(a.pickupDate+a.time).localeCompare(b.pickupDate+b.time))}
+function visibleHistory(){const q=historySearch.trim().toLowerCase();return pickups.filter(p=>p.status==='delivered'&&(!q||[p.company,p.address,p.phone,p.reg,p.vehicle,p.items,p.jobNo,p.customer].some(v=>String(v||'').toLowerCase().includes(q)))).sort((a,b)=>(b.completedAt||0)-(a.completedAt||0))}
+function nextPending(){return pickups.filter(p=>p.pickupDate===isoDate()&&['pending','collected'].includes(p.status)).sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'))[0]||null}
+function mapsUrl(addr){return 'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(addr)}
+function wholeRouteUrl(){const list=pickups.filter(p=>p.pickupDate===isoDate()&&p.status==='pending'&&p.address).sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));if(!list.length)return '';if(list.length===1)return mapsUrl(list[0].address);return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(list.at(-1).address)}&waypoints=${encodeURIComponent(list.slice(0,-1).map(p=>p.address).join('|'))}&travelmode=driving`}
+function cardHTML(p,i=0){return `<article class="route-card"><div class="step">${i+1}</div><div><div class="card-top"><div><div class="time">${esc(p.time||'--:--')}</div><div class="company">${esc(p.company)}</div></div><span class="status ${p.status}">${statusText(p.status)}</span></div><div class="address">📍 ${esc(p.address)}</div><div class="meta">${p.pickupDate?`<span class="chip">📅 ${esc(p.pickupDate)}</span>`:''}${p.reg?`<span class="chip">🚘 ${esc(p.reg)}</span>`:''}${p.customer?`<span class="chip">👤 ${esc(p.customer)}</span>`:''}${p.quantity?`<span class="chip">📦 ${p.quantity} szt.</span>`:''}${p.items?`<span class="chip">🧩 ${esc(p.items)}</span>`:''}${p.photos?.length?`<span class="chip">📷 ${p.photos.length}</span>`:''}${p.signature?`<span class="chip">✍️ podpis</span>`:''}${p.assignedName?`<span class="chip">👨‍🔧 ${esc(p.assignedName)}</span>`:''}</div><div class="actions"><button class="act blue" onclick="goNav('${p.id}')">🧭 Nawiguj</button><button class="act" onclick="callP('${p.id}')">📞 Zadzwoń</button><button class="act" onclick="editP('${p.id}')">✏️ Edytuj</button><button class="act ${p.status==='delivered'?'':'green'}" onclick="advanceP('${p.id}')">${p.status==='pending'?'📦 Odebrane':p.status==='collected'?'✅ Dostarczone':'↩️ Przywróć'}</button></div></div></article>`}
+
+function render(){
+ const today=todayItems();$('statAll').textContent=today.length;$('statPending').textContent=today.filter(p=>p.status==='pending').length;$('statCollected').textContent=today.filter(p=>p.status==='collected').length;$('statDone').textContent=today.filter(p=>p.status==='delivered').length;
+ const dash=today.filter(p=>p.status!=='delivered').sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99')).slice(0,4);$('dashboardRoute').innerHTML=dash.length?dash.map(cardHTML).join(''):`<div class="empty"><div class="big">✅</div><b>Brak aktywnych punktów na dziś</b><div>Dodaj nowe zlecenie albo zaplanuj jutro.</div></div>`;
+ const rf=routeFiltered();$('routeList').innerHTML=rf.length?rf.map(cardHTML).join(''):`<div class="empty"><div class="big">🗺️</div><b>Brak punktów dla tych filtrów</b></div>`;
+ renderOrders();renderWorkshops();renderHistory();renderDriver();renderInventory();renderCustomers();renderExpenses();renderReports();renderTeam();renderDriverLive();
+}
+function renderOrders(){const q=ordersSearch.trim().toLowerCase(),list=pickups.filter(p=>!q||[p.company,p.address,p.phone,p.reg,p.vehicle,p.items,p.jobNo,p.customer].some(v=>String(v||'').toLowerCase().includes(q))).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));$('ordersList').innerHTML=list.length?list.map(p=>`<div class="record"><div class="record-row"><div><h4>${esc(p.company)} ${p.reg?`• ${esc(p.reg)}`:''}</h4><small>${esc(p.pickupDate)} ${esc(p.time)} • ${esc(p.address)}</small></div><span class="status ${p.status}">${statusText(p.status)}</span></div><div class="meta">${p.customer?`<span class="chip">👤 ${esc(p.customer)}</span>`:''}${p.vehicle?`<span class="chip">${esc(p.vehicle)}</span>`:''}${p.jobNo?`<span class="chip"># ${esc(p.jobNo)}</span>`:''}${p.jobValue?`<span class="chip">${money(p.jobValue)}</span>`:''}${p.items?`<span class="chip">${esc(p.items)}</span>`:''}${p.photos?.length?`<span class="chip">📷 ${p.photos.length}</span>`:''}${p.signature?`<span class="chip">✍️ podpis</span>`:''}${p.assignedName?`<span class="chip">👨‍🔧 ${esc(p.assignedName)}</span>`:''}</div><div class="actions"><button class="act" onclick="editP('${p.id}')">✏️ Edytuj</button><button class="act blue" onclick="goNav('${p.id}')">🧭 Nawiguj</button><button class="act" onclick="copyP('${p.id}')">📋 Kopiuj</button><button class="act red" onclick="deleteP('${p.id}')">🗑 Usuń</button></div></div>`).join(''):`<div class="empty">Brak zleceń.</div>`}
+function deriveWorkshops(){const map=new Map();meta.workshops.forEach(w=>map.set((w.name+'|'+w.address).toLowerCase(),w));pickups.forEach(p=>{if(p.company&&p.address){const k=(p.company+'|'+p.address).toLowerCase();if(!map.has(k))map.set(k,{id:uid(),name:p.company,address:p.address,phone:p.phone||'',notes:''})}});return [...map.values()]}
+function renderWorkshops(){const q=workshopSearch.trim().toLowerCase(),list=deriveWorkshops().filter(w=>!q||[w.name,w.address,w.phone].some(v=>String(v||'').toLowerCase().includes(q))).sort((a,b)=>a.name.localeCompare(b.name));$('workshopsList').innerHTML=list.length?list.map(w=>`<div class="record"><div class="record-row"><div><h4>🏭 ${esc(w.name)}</h4><small>${esc(w.address)} ${w.phone?'• '+esc(w.phone):''}</small></div><span class="badge">${pickups.filter(p=>p.company.toLowerCase()===w.name.toLowerCase()).length} zleceń</span></div><div class="actions"><button class="act blue" onclick="newFromWorkshop('${encodeURIComponent(w.name)}','${encodeURIComponent(w.address)}','${encodeURIComponent(w.phone||'')}')">＋ Odbiór</button><button class="act" onclick="window.open('${mapsUrl(w.address)}','_blank')">🧭 Mapa</button><button class="act" onclick="copyText('${encodeURIComponent(w.address)}','Adres skopiowany')">📋 Adres</button><button class="act" onclick="window.location.href='tel:${esc(w.phone||'')}'">📞 Telefon</button></div></div>`).join(''):`<div class="empty">Brak zapisanych warsztatów.</div>`}
+function renderHistory(){const list=visibleHistory();$('histDelivered').textContent=list.length;$('histParts').textContent=list.reduce((a,p)=>a+(Number(p.quantity)||0),0);$('histCompanies').textContent=new Set(list.map(p=>p.company.toLowerCase())).size;$('historyList').innerHTML=list.length?list.map(p=>`<div class="record"><div class="record-row"><div><h4>${esc(p.company)} ${p.reg?`• ${esc(p.reg)}`:''}</h4><small>${esc(p.pickupDate)} ${esc(p.time)} • ${esc(p.address)}</small></div><span class="status delivered">DOSTARCZONE</span></div><div class="meta">${p.customer?`<span class="chip">👤 ${esc(p.customer)}</span>`:''}${p.quantity?`<span class="chip">${p.quantity} szt.</span>`:''}${p.items?`<span class="chip">${esc(p.items)}</span>`:''}${p.jobNo?`<span class="chip">${esc(p.jobNo)}</span>`:''}</div></div>`).join(''):`<div class="empty">Historia jest pusta.</div>`}
+function renderDriver(){const p=nextPending(),box=$('driverCard');if(!p){box.innerHTML=`<div class="empty"><div class="big">✅</div><b>Dzisiejsza trasa zakończona</b></div>`;return}box.innerHTML=`<div class="time">${esc(p.time||'--:--')}</div><div class="driver-company">${esc(p.company)}</div><div class="driver-address">📍 ${esc(p.address)}</div><div class="meta">${p.reg?`<span class="chip">🚘 ${esc(p.reg)}</span>`:''}${p.items?`<span class="chip">📦 ${esc(p.items)}</span>`:''}${p.notes?`<span class="chip">📝 ${esc(p.notes)}</span>`:''}</div><div class="driver-actions"><button class="mapbtn" onclick="goNav('${p.id}')">🧭 NAWIGUJ</button><button class="donebtn" onclick="advanceP('${p.id}')">${p.status==='pending'?'📦 ODEBRANE':'✅ DOSTARCZONE'}</button><button class="callbtn" onclick="callP('${p.id}')">📞 ZADZWOŃ</button><button class="skipbtn" onclick="skipDriver()">⏭️ NASTĘPNY</button></div>`}
+function renderInventory(){if(!$('inventoryList'))return;const q=inventorySearch.trim().toLowerCase(),list=pro.inventory.filter(x=>!q||[x.name,x.jobNo,x.reg,x.notes].some(v=>String(v||'').toLowerCase().includes(q))).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));$('invAll').textContent=pro.inventory.length;$('invVehicle').textContent=pro.inventory.filter(x=>x.status==='vehicle').length;$('invDelivered').textContent=pro.inventory.filter(x=>x.status==='delivered').length;$('invValue').textContent=money(pro.inventory.reduce((s,x)=>s+(Number(x.price)||0)*(Number(x.qty)||1),0));$('inventoryList').innerHTML=list.length?list.map(x=>`<div class="record"><div class="record-row"><div><h4>📦 ${esc(x.name)} × ${x.qty}</h4><small>${esc(x.jobNo||'Bez numeru')} ${x.reg?'• '+esc(x.reg):''}</small></div><span class="status ${x.status==='delivered'?'delivered':x.status==='vehicle'?'collected':'pending'}">${x.status==='vehicle'?'W AUCIE':x.status==='delivered'?'DOSTARCZONE':'W WARSZTACIE'}</span></div><div class="meta"><span class="chip">${money(x.price)}</span>${x.notes?`<span class="chip">${esc(x.notes)}</span>`:''}</div><div class="actions"><button class="act green" onclick="advanceInv('${x.id}')">➡️ Zmień status</button><button class="act red" onclick="deleteInv('${x.id}')">🗑 Usuń</button></div></div>`).join(''):`<div class="empty">Magazyn jest pusty.</div>`}
+function renderCustomers(){if(!$('customersList'))return;const map=new Map();pickups.forEach(p=>{if(!p.customer&&!p.reg)return;const k=(p.customer||'')+'|'+(p.reg||'');if(!map.has(k))map.set(k,{customer:p.customer||'Nieznany klient',phone:p.customerPhone||'',reg:p.reg||'',vehicle:p.vehicle||'',jobs:[]});map.get(k).jobs.push(p)});const q=customerSearch.trim().toLowerCase(),list=[...map.values()].filter(x=>!q||[x.customer,x.phone,x.reg,x.vehicle].some(v=>String(v||'').toLowerCase().includes(q)));$('customersList').innerHTML=list.length?list.map(x=>`<div class="record"><div class="record-row"><div><h4>👤 ${esc(x.customer)}</h4><small>${x.reg?`🚘 ${esc(x.reg)} `:''}${esc(x.vehicle)}</small></div><span class="badge">${x.jobs.length} zleceń</span></div><div class="meta">${x.phone?`<span class="chip">📞 ${esc(x.phone)}</span>`:''}<span class="chip">✅ ${x.jobs.filter(j=>j.status==='delivered').length} zakończonych</span></div></div>`).join(''):`<div class="empty">Dodaj klienta lub rejestrację do zlecenia, aby pojawiły się tutaj.</div>`}
+function renderExpenses(){if(!$('expensesList'))return;const now=isoDate(),month=now.slice(0,7),sum=a=>a.reduce((s,x)=>s+Number(x.amount||0),0);$('expToday').textContent=money(sum(pro.expenses.filter(x=>x.date===now)));$('expMonth').textContent=money(sum(pro.expenses.filter(x=>x.date.startsWith(month))));$('expFuel').textContent=money(sum(pro.expenses.filter(x=>x.category==='fuel')));$('expOther').textContent=money(sum(pro.expenses.filter(x=>x.category!=='fuel')));$('expensesList').innerHTML=pro.expenses.length?pro.expenses.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(x=>`<div class="record"><div class="record-row"><div><h4>${x.category==='fuel'?'⛽':x.category==='parking'?'🅿️':x.category==='parts'?'🧩':'💷'} ${esc(x.note||x.category)}</h4><small>${esc(x.date)} ${x.jobNo?'• '+esc(x.jobNo):''}</small></div><div class="money">${money(x.amount)}</div></div><div class="actions"><button class="act red" onclick="deleteExpense('${x.id}')">🗑 Usuń</button></div></div>`).join(''):`<div class="empty">Brak zapisanych wydatków.</div>`}
+
+function addActivity(text,who='System'){
+  pro.activity=pro.activity||[];
+  pro.activity.unshift({id:uid(),time:Date.now(),text,who});
+  pro.activity=pro.activity.slice(0,100);
+}
+function teamMembers(){
+  const base=[{id:cloudUser?.id||'owner-local',name:currentMembership?.display_name||meta.driverName||'Właściciel',email:cloudUser?.email||'',phone:currentMembership?.phone||'',role:currentMembership?.role||'owner'}];
+  const extra=(pro.team||[]).filter(x=>!base.some(b=>b.email&&x.email&&b.email.toLowerCase()===x.email.toLowerCase()));
+  return [...base,...extra];
+}
+function populateAssignees(selected=''){
+  const el=$('assignedTo');if(!el)return;
+  el.innerHTML='<option value="">Nieprzypisane</option>'+teamMembers().map(m=>`<option value="${esc(m.id)}">${esc(m.name)} — ${m.role==='owner'?'Właściciel':m.role==='admin'?'Admin':m.role==='driver'?'Kierowca':'Pracownik'}</option>`).join('');
+  el.value=selected||'';
+}
+function renderTeam(){
+  if(!$('teamList'))return;
+  const members=teamMembers(),today=isoDate();
+  $('teamCount').textContent=members.length;
+  $('teamDrivers').textContent=members.filter(m=>['driver','owner'].includes(m.role)).length;
+  $('teamAssigned').textContent=pickups.filter(p=>p.pickupDate===today&&p.assignedTo).length;
+  $('teamDone').textContent=pickups.filter(p=>p.pickupDate===today&&p.status==='delivered').length;
+  $('teamList').innerHTML=members.map(m=>{
+    const jobs=pickups.filter(p=>p.assignedTo===m.id&&p.pickupDate===today);
+    const roleTxt=m.role==='owner'?'Właściciel':m.role==='admin'?'Administrator':m.role==='driver'?'Kierowca':'Pracownik';
+    return `<div class="person"><div class="person-top"><div class="person-avatar">👤</div><div><h4>${esc(m.name)}</h4><small>${esc(m.email||m.phone||'Bez danych kontaktowych')}</small></div></div><span class="role ${m.role}">${roleTxt}</span><div class="assignment"><b>${jobs.length} zleceń dzisiaj</b><div class="muted">${jobs.filter(j=>j.status==='delivered').length} zakończonych • ${jobs.filter(j=>j.status!=='delivered').length} aktywnych</div></div>${m.role!=='owner'?`<div class="actions"><button class="act red" onclick="removeTeam('${m.id}')">🗑 Usuń</button></div>`:''}</div>`
+  }).join('');
+  const acts=(pro.activity||[]).slice(0,20);
+  $('teamActivity').innerHTML=acts.length?acts.map(a=>`<div class="activity"><b>${esc(a.text)}</b><small>${esc(a.who)} • ${new Date(a.time).toLocaleString('pl-PL')}</small></div>`).join(''):`<div class="empty">Brak aktywności zespołu.</div>`;
+  populateAssignees($('assignedTo')?.value||'');
+}
+window.removeTeam=id=>{
+  const m=(pro.team||[]).find(x=>x.id===id);if(!m)return;
+  if(confirm(`Usunąć ${m.name} z zespołu?`)){pro.team=pro.team.filter(x=>x.id!==id);pickups.forEach(p=>{if(p.assignedTo===id){p.assignedTo='';p.assignedName=''}});addActivity(`Usunięto pracownika ${m.name}`,meta.driverName||'Właściciel');save();render();}
+}
+
+function renderReports(){if(!$('repJobs'))return;let from=new Date();if(reportRange==='today')from=new Date(isoDate()+'T00:00:00');else from.setDate(from.getDate()-(reportRange==='week'?6:29));const fromIso=isoDate(from),jobs=pickups.filter(p=>p.pickupDate>=fromIso),exp=pro.expenses.filter(x=>x.date>=fromIso);$('repJobs').textContent=jobs.length;$('repDelivered').textContent=jobs.filter(p=>p.status==='delivered').length;$('repParts').textContent=jobs.reduce((s,p)=>s+Number(p.quantity||0),0);$('repExpenses').textContent=money(exp.reduce((s,x)=>s+Number(x.amount||0),0));const rate=jobs.length?Math.round(jobs.filter(p=>p.status==='delivered').length/jobs.length*100):0;$('repRateText').textContent=rate+'% zakończonych zleceń';$('repRateBar').style.width=rate+'%';const counts={};jobs.forEach(p=>counts[p.company]=(counts[p.company]||0)+1);const top=Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];$('repTopWorkshop').textContent=top?`${top[0]} — ${top[1]} zleceń`:'Brak danych';const groups={};jobs.forEach(p=>{groups[p.pickupDate]??={jobs:0,done:0,parts:0,value:0};groups[p.pickupDate].jobs++;groups[p.pickupDate].done+=p.status==='delivered';groups[p.pickupDate].parts+=Number(p.quantity||0);groups[p.pickupDate].value+=Number(p.jobValue||0)});$('reportsList').innerHTML=Object.entries(groups).sort((a,b)=>b[0].localeCompare(a[0])).map(([d,g])=>`<div class="record"><div class="record-row"><div><h4>${d}</h4><small>${g.jobs} zleceń • ${g.done} dostarczonych • ${g.parts} części</small></div><b>${money(g.value)}</b></div></div>`).join('')||`<div class="empty">Brak danych w tym okresie.</div>`}
+
+
+
+function isDriver(){return currentMembership&&currentMembership.role==='driver'}
+function isManager(){return currentMembership&&['owner','admin'].includes(currentMembership.role)}
+function applyRoleMode(){
+  document.body.classList.toggle('mode-driver',!!isDriver());
+  if($('inviteCode'))$('inviteCode').textContent=cloudWorkspace?.invite_code||'--------';
+  if(isDriver())showView('driverlive');
+}
+async function refreshMemberships(){
+  if(!sb||!cloudWorkspace)return [];
+  const {data,error}=await sb.from('workspace_members').select('workspace_id,user_id,role,display_name,email,phone,created_at').eq('workspace_id',cloudWorkspace.id);
+  if(error)return [];
+  return data||[];
+}
+async function renderCloudTeam(){
+  if(!cloudWorkspace||!$('teamList'))return;
+  const members=await refreshMemberships();
+  if(members.length){
+    pro.team=members.filter(m=>m.user_id!==cloudUser?.id).map(m=>({id:m.user_id,name:m.display_name||m.email||'Pracownik',email:m.email||'',phone:m.phone||'',role:m.role||'driver'}));
+    renderTeam();
+  }
+}
+async function renderLiveLocations(){
+  if(!sb||!cloudWorkspace||!$('liveLocations'))return;
+  const {data}=await sb.from('driver_locations').select('user_id,lat,lng,accuracy,updated_at').eq('workspace_id',cloudWorkspace.id).order('updated_at',{ascending:false});
+  const members=await refreshMemberships();
+  const mm=new Map(members.map(m=>[m.user_id,m]));
+  const recent=(data||[]).filter(x=>Date.now()-Date.parse(x.updated_at)<1000*60*30);
+  $('liveLocations').innerHTML=recent.length?recent.map(x=>{const m=mm.get(x.user_id);return `<div class="location-row"><div><b>📍 ${esc(m?.display_name||m?.email||'Kierowca')}</b><div class="muted">${new Date(x.updated_at).toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'})} • dokładność ${Math.round(x.accuracy||0)} m</div></div><button class="act blue" onclick="window.open('https://www.google.com/maps?q=${x.lat},${x.lng}','_blank')">Mapa</button></div>`}).join(''):`<div class="empty">Brak aktywnych lokalizacji z ostatnich 30 minut.</div>`;
+}
+function myJobs(){
+  if(!cloudUser)return [];
+  return pickups.filter(p=>p.assignedTo===cloudUser.id&&p.pickupDate===isoDate()).sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
+}
+function renderDriverLive(){
+  if(!$('myJobsList'))return;
+  const list=myJobs();
+  $('myJobsCount').textContent=list.length;$('myPendingCount').textContent=list.filter(p=>p.status==='pending').length;$('myCollectedCount').textContent=list.filter(p=>p.status==='collected').length;$('myDoneCount').textContent=list.filter(p=>p.status==='delivered').length;
+  $('driverDayState').textContent=driverDayStarted?'Trasa aktywna':'Gotowy';
+  $('driverDayInfo').textContent=driverDayStarted?`Masz ${list.filter(p=>p.status!=='delivered').length} aktywnych punktów.`:'Uruchom trasę, aby rozpocząć pracę.';
+  $('myJobsList').innerHTML=list.length?list.map(cardHTML).join(''):`<div class="empty"><div class="big">🛣️</div><b>Brak zleceń przypisanych na dziś.</b></div>`;
+}
+async function pushActivity(action,jobId=''){
+  if(!sb||!cloudWorkspace||!cloudUser)return;
+  await sb.from('team_activity').insert({workspace_id:cloudWorkspace.id,user_id:cloudUser.id,actor_name:currentMembership?.display_name||cloudUser.email||'Użytkownik',action,job_client_id:jobId||null});
+}
+async function startRealtime(){
+  if(!sb||!cloudWorkspace)return;
+  if(liveChannel)await sb.removeChannel(liveChannel);
+  liveChannel=sb.channel('abm-live-'+cloudWorkspace.id)
+    .on('postgres_changes',{event:'*',schema:'public',table:'jobs',filter:`workspace_id=eq.${cloudWorkspace.id}`},async()=>{await pullCloud(false);renderDriverLive()})
+    .on('postgres_changes',{event:'*',schema:'public',table:'driver_locations',filter:`workspace_id=eq.${cloudWorkspace.id}`},()=>renderLiveLocations())
+    .on('postgres_changes',{event:'*',schema:'public',table:'workspace_members',filter:`workspace_id=eq.${cloudWorkspace.id}`},()=>renderCloudTeam())
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'team_activity',filter:`workspace_id=eq.${cloudWorkspace.id}`},()=>renderCloudTeam())
+    .subscribe();
+}
+async function startLocation(){
+  if(!navigator.geolocation)return alert('Ta przeglądarka nie udostępnia lokalizacji.');
+  if(!cloudUser||!cloudWorkspace)return alert('Najpierw zaloguj się do aplikacji.');
+  if(geoWatchId!==null)return toast('Lokalizacja jest już włączona');
+  geoWatchId=navigator.geolocation.watchPosition(async pos=>{
+    const row={workspace_id:cloudWorkspace.id,user_id:cloudUser.id,lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:pos.coords.accuracy,updated_at:new Date().toISOString()};
+    const {error}=await sb.from('driver_locations').upsert(row,{onConflict:'workspace_id,user_id'});
+    if(!error)setCloudStatus('on','LIVE GPS');
+  },err=>{alert('Nie udało się włączyć lokalizacji: '+err.message);geoWatchId=null},{enableHighAccuracy:true,maximumAge:15000,timeout:20000});
+  toast('Lokalizacja LIVE włączona');
+}
+function stopLocation(){
+  if(geoWatchId!==null&&navigator.geolocation){navigator.geolocation.clearWatch(geoWatchId);geoWatchId=null}
+}
+
+function setCloudStatus(mode,text){
+  const dot=$('cloudDot'),tx=$('cloudText');
+  if(!dot||!tx)return;
+  dot.className='cloud-dot'+(mode==='on'?' on':mode==='busy'?' busy':'');
+  tx.textContent=text;
+}
+function updateAuthUI(){
+  if(!$('signedOutBox'))return;
+  $('signedOutBox').style.display=cloudUser?'none':'block';
+  $('signedInBox').style.display=cloudUser?'block':'none';
+  $('cloudUserEmail').textContent=cloudUser?.email||'—';
+  $('workspaceName').textContent=(cloudWorkspace?.name||'Auto Body Manager')+(currentMembership?.role?` • ${currentMembership.role.toUpperCase()}`:'');
+  setCloudStatus(cloudUser?'on':'off',cloudUser?'Chmura':'Lokalnie');
+}
+async function initCloud(){
+  if(!sb){setCloudStatus('off','Brak chmury');return}
+  try{
+    const {data}=await sb.auth.getSession();
+    cloudUser=data.session?.user||null;
+    if(cloudUser){await loadWorkspace();await pullCloud(false);await renderCloudTeam();await renderLiveLocations();await startRealtime();renderDriverLive()}
+    updateAuthUI();
+    sb.auth.onAuthStateChange(async(_event,session)=>{
+      cloudUser=session?.user||null;
+      if(cloudUser){await loadWorkspace();await pullCloud(false);await renderCloudTeam();await renderLiveLocations();await startRealtime();renderDriverLive()}
+      else cloudWorkspace=null;
+      updateAuthUI();
+    });
+  }catch(e){setCloudStatus('off','Offline')}
+}
+async function loadWorkspace(){
+  if(!cloudUser||!sb)return null;
+  try{
+    let mem=await sb.from('workspace_members').select('workspace_id,role,display_name,email,phone,workspaces(id,name,owner_id,invite_code)').eq('user_id',cloudUser.id).limit(1).maybeSingle();
+    if(mem.error)throw mem.error;
+    if(mem.data){
+      currentMembership=mem.data;
+      cloudWorkspace=mem.data.workspaces;
+      applyRoleMode();
+      return cloudWorkspace;
+    }
+    let own=await sb.from('workspaces').select('id,name,owner_id,invite_code').eq('owner_id',cloudUser.id).limit(1).maybeSingle();
+    if(own.error)throw own.error;
+    if(!own.data){
+      const name=(meta.driverName||cloudUser.email?.split('@')[0]||'Auto Body')+' - Auto Body';
+      const created=await sb.from('workspaces').insert({name,owner_id:cloudUser.id}).select('id,name,owner_id,invite_code').single();
+      if(created.error)throw created.error;
+      own.data=created.data;
+    }
+    const up=await sb.from('workspace_members').upsert({workspace_id:own.data.id,user_id:cloudUser.id,role:'owner',display_name:meta.driverName||'Właściciel',email:cloudUser.email},{onConflict:'workspace_id,user_id'}).select('workspace_id,role,display_name,email,phone').single();
+    if(up.error)throw up.error;
+    currentMembership=up.data;cloudWorkspace=own.data;applyRoleMode();return cloudWorkspace;
+  }catch(e){console.warn('Workspace:',e.message);cloudWorkspace=null;currentMembership=null;return null}
+}
+function jobToCloud(p){
+  return {workspace_id:cloudWorkspace.id,client_id:String(p.id),user_id:cloudUser.id,company:p.company||'',address:p.address||'',phone:p.phone||'',pickup_date:p.pickupDate||isoDate(),pickup_time:p.time||null,customer:p.customer||'',customer_phone:p.customerPhone||'',registration:p.reg||'',vehicle:p.vehicle||'',quantity:Number(p.quantity||0),job_no:p.jobNo||'',job_value:Number(p.jobValue||0),items:p.items||'',notes:p.notes||'',status:p.status||'pending',photos:p.photos||[],signature:p.signature||'',collected_at:p.collectedAt?new Date(p.collectedAt).toISOString():null,completed_at:p.completedAt?new Date(p.completedAt).toISOString():null,assigned_user_id:p.assignedTo||null,assigned_name:p.assignedName||'',started_at:p.startedAt?new Date(p.startedAt).toISOString():null,updated_at:new Date().toISOString()};
+}
+function cloudToJob(p){
+  return normalize({id:p.client_id||p.id,company:p.company,address:p.address,phone:p.phone,pickupDate:p.pickup_date,time:(p.pickup_time||'').slice(0,5),customer:p.customer,customerPhone:p.customer_phone,reg:p.registration,vehicle:p.vehicle,quantity:p.quantity,jobNo:p.job_no,jobValue:p.job_value,items:p.items,notes:p.notes,status:p.status,photos:p.photos,signature:p.signature,collectedAt:p.collected_at?Date.parse(p.collected_at):null,completedAt:p.completed_at?Date.parse(p.completed_at):null,assignedTo:p.assigned_user_id||'',assignedName:p.assigned_name||'',startedAt:p.started_at?Date.parse(p.started_at):null,createdAt:p.created_at?Date.parse(p.created_at):Date.now()});
+}
+async function syncCloud(silent=false){
+  if(!sb||!cloudUser||!cloudWorkspace||cloudBusy)return;
+  cloudBusy=true;setCloudStatus('busy','Synchronizacja…');
+  try{
+    const jobsToPush=isDriver()?pickups.filter(p=>p.assignedTo===cloudUser.id):pickups;
+    if(isDriver()){
+      for(const p of jobsToPush){
+        const row=jobToCloud(p);
+        const {error}=await sb.from('jobs').update({
+          status:row.status,
+          collected_at:row.collected_at,
+          completed_at:row.completed_at,
+          started_at:row.started_at,
+          updated_at:row.updated_at
+        }).eq('workspace_id',cloudWorkspace.id).eq('client_id',String(p.id)).eq('assigned_user_id',cloudUser.id);
+        if(error)throw error;
+      }
+      await pullCloud(true);setCloudStatus('on','Chmura');cloudBusy=false;return
+    }
+    if(jobsToPush.length){
+      const {error}=await sb.from('jobs').upsert(jobsToPush.map(jobToCloud),{onConflict:'workspace_id,client_id'});
+      if(error)throw error;
+    }
+    const ws=deriveWorkshops().map(w=>({workspace_id:cloudWorkspace.id,client_id:String(w.id||uid()),name:w.name||'',address:w.address||'',phone:w.phone||'',notes:w.notes||'',updated_at:new Date().toISOString()}));
+    if(ws.length){const {error}=await sb.from('workshops').upsert(ws,{onConflict:'workspace_id,client_id'});if(error)throw error}
+    const inv=pro.inventory.map(x=>({workspace_id:cloudWorkspace.id,client_id:String(x.id),name:x.name||'',qty:Number(x.qty||1),job_no:x.jobNo||'',registration:x.reg||'',price:Number(x.price||0),status:x.status||'vehicle',notes:x.notes||'',updated_at:new Date().toISOString()}));
+    if(inv.length){const {error}=await sb.from('inventory').upsert(inv,{onConflict:'workspace_id,client_id'});if(error)throw error}
+    const ex=pro.expenses.map(x=>({workspace_id:cloudWorkspace.id,client_id:String(x.id),expense_date:x.date||isoDate(),category:x.category||'other',amount:Number(x.amount||0),job_no:x.jobNo||'',note:x.note||'',updated_at:new Date().toISOString()}));
+    if(ex.length){const {error}=await sb.from('expenses').upsert(ex,{onConflict:'workspace_id,client_id'});if(error)throw error}
+    await pullCloud(true);
+    localStorage.setItem('autoBodyManagerLastSync',new Date().toISOString());
+    const t=new Date().toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'});
+    if($('lastSyncText'))$('lastSyncText').textContent='Ostatnia synchronizacja: '+t;
+    setCloudStatus('on','Chmura');
+    if(!silent)toast('Dane zsynchronizowane');
+  }catch(e){
+    console.warn('Sync:',e);
+    setCloudStatus('off','Błąd chmury');
+    if(!silent)alert('Nie udało się zsynchronizować danych. Dane lokalne są bezpieczne.\\n\\n'+(e.message||'Błąd połączenia'));
+  }finally{cloudBusy=false}
+}
+async function pullCloud(skipRender=false){
+  if(!sb||!cloudWorkspace)return;
+  try{
+    const [j,w,i,e]=await Promise.all([
+      sb.from('jobs').select('*').eq('workspace_id',cloudWorkspace.id),
+      sb.from('workshops').select('*').eq('workspace_id',cloudWorkspace.id),
+      sb.from('inventory').select('*').eq('workspace_id',cloudWorkspace.id),
+      sb.from('expenses').select('*').eq('workspace_id',cloudWorkspace.id)
+    ]);
+    if(j.error)throw j.error;
+    const byId=new Map(pickups.map(p=>[String(p.id),p]));
+    (j.data||[]).forEach(x=>byId.set(String(x.client_id||x.id),cloudToJob(x)));
+    pickups=[...byId.values()];
+    if(!meta.workshops.length && w.data?.length)meta.workshops=w.data.map(x=>({id:x.client_id||x.id,name:x.name,address:x.address,phone:x.phone,notes:x.notes}));
+    if(i.data?.length)pro.inventory=i.data.map(x=>({id:x.client_id||x.id,name:x.name,qty:x.qty,jobNo:x.job_no,reg:x.registration,price:Number(x.price||0),status:x.status,notes:x.notes,createdAt:x.created_at?Date.parse(x.created_at):Date.now()}));
+    if(e.data?.length)pro.expenses=e.data.map(x=>({id:x.client_id||x.id,date:x.expense_date,category:x.category,amount:Number(x.amount||0),jobNo:x.job_no,note:x.note}));
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(pickups));localStorage.setItem(META_KEY,JSON.stringify(meta));localStorage.setItem(PRO_KEY,JSON.stringify(pro));
+    if(!skipRender)render();
+  }catch(err){console.warn('Pull:',err.message)}
+}
+
+function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.dataset.view===v));document.querySelectorAll('.nav-btn').forEach(x=>x.classList.toggle('active',x.dataset.nav===v));const names={dashboard:['CENTRUM DOWODZENIA','Dzień kierowcy'],route:['PLAN DNIA','Trasa'],orders:['BAZA','Zlecenia'],workshops:['KONTAKTY','Warsztaty'],history:['ARCHIWUM','Historia'],settings:['SYSTEM','Ustawienia'],cloud:['CHMURA','Konto i synchronizacja'],team:['ZESPÓŁ','Zespół i przydziały'],driverlive:['DRIVER LIVE','Moja trasa'],inventory:['MAGAZYN','Części'],customers:['KLIENCI','Klienci i auta'],expenses:['KOSZTY','Wydatki'],reports:['RAPORTY','Podsumowanie'],more:['AUTO BODY MANAGER PRO','Więcej']};$('viewEyebrow').textContent=names[v]?.[0]||'AUTO BODY MANAGER';$('viewTitle').textContent=names[v]?.[1]||'PRO 5.0 LIVE';window.scrollTo({top:0,behavior:'smooth'})}
+function openModal(id){$(id).classList.add('open')}function closeModal(id){$(id).classList.remove('open')}
+function clearSignatureCanvas(){const c=$('signatureCanvas');const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);signatureChanged=false}
+function resetOrder(date=isoDate()){ $('orderForm').reset();$('editId').value='';$('pickupDate').value=date;$('status').value='pending';$('orderModalTitle').textContent='Nowy odbiór';pendingPhotos=[];renderPhotoPreview();clearSignatureCanvas()}
+function openNew(date=isoDate()){resetOrder(date);populateAssignees('');openModal('orderModal')}
+function renderPhotoPreview(){if(!$('photoPreview'))return;$('photoPreview').innerHTML=pendingPhotos.map((x,i)=>`<img class="photo-thumb" src="${x}" alt="zdjęcie ${i+1}">`).join('')}
+function loadSignature(sig){clearSignatureCanvas();if(!sig)return;const img=new Image();img.onload=()=>{$('signatureCanvas').getContext('2d').drawImage(img,0,0,$('signatureCanvas').width,$('signatureCanvas').height)};img.src=sig}
+function canvasHasInk(){const c=$('signatureCanvas'),ctx=c.getContext('2d'),d=ctx.getImageData(0,0,c.width,c.height).data;for(let i=0;i<d.length;i+=4){if(!(d[i]>245&&d[i+1]>245&&d[i+2]>245))return true}return false}
+
+window.editP=id=>{const p=pickups.find(x=>x.id===id);if(!p)return;$('editId').value=id;['company','phone','address','pickupDate','time','reg','vehicle','quantity','jobNo','items','notes','status','customer','customerPhone','jobValue'].forEach(k=>$(k).value=p[k]??'');$('orderModalTitle').textContent='Edytuj zlecenie';pendingPhotos=[...(p.photos||[])];renderPhotoPreview();loadSignature(p.signature||'');populateAssignees(p.assignedTo||'');openModal('orderModal')}
+window.goNav=id=>{const p=pickups.find(x=>x.id===id);if(p?.address)window.open(mapsUrl(p.address),'_blank')}
+window.callP=id=>{const p=pickups.find(x=>x.id===id);if(p?.phone)location.href='tel:'+p.phone;else toast('Brak numeru telefonu')}
+window.copyP=async id=>{const p=pickups.find(x=>x.id===id);if(!p)return;const t=`${p.company}\n${p.address}\n${p.phone||''}\n${p.customer||''}\n${p.reg||''}\n${p.items||''}`;try{await navigator.clipboard.writeText(t);toast('Zlecenie skopiowane')}catch(_){}}
+window.copyText=async(s,msg)=>{try{await navigator.clipboard.writeText(decodeURIComponent(s));toast(msg)}catch(_){}}
+window.advanceP=async id=>{
+  const p=pickups.find(x=>x.id===id);if(!p)return;
+  if(isDriver()&&p.assignedTo!==cloudUser?.id)return alert('To zlecenie nie jest przypisane do Ciebie.');
+  if(p.status==='pending'){p.status='collected';p.collectedAt=Date.now()}else if(p.status==='collected'){p.status='delivered';p.completedAt=Date.now()}else{p.status='pending';p.completedAt=null;p.collectedAt=null}
+  addActivity(`${p.company}: ${statusText(p.status)}`,p.assignedName||meta.driverName||'Kierowca');save();render();
+  await pushActivity(`${p.company}: ${statusText(p.status)}`,String(p.id));
+  if(cloudUser&&cloudWorkspace)await syncCloud(true);
+}
+window.deleteP=id=>{const p=pickups.find(x=>x.id===id);if(p&&confirm(`Usunąć zlecenie: ${p.company}?`)){pickups=pickups.filter(x=>x.id!==id);save();render();toast('Zlecenie usunięte')}}
+window.newFromWorkshop=(n,a,ph)=>{openNew();$('company').value=decodeURIComponent(n);$('address').value=decodeURIComponent(a);$('phone').value=decodeURIComponent(ph)}
+window.advanceInv=id=>{const x=pro.inventory.find(v=>v.id===id);if(!x)return;x.status=x.status==='vehicle'?'workshop':x.status==='workshop'?'delivered':'vehicle';save();renderInventory()}
+window.deleteInv=id=>{if(confirm('Usunąć tę pozycję z magazynu?')){pro.inventory=pro.inventory.filter(x=>x.id!==id);save();renderInventory()}}
+window.deleteExpense=id=>{if(confirm('Usunąć ten wydatek?')){pro.expenses=pro.expenses.filter(x=>x.id!==id);save();renderExpenses();renderReports()}}
+window.toast=toast;
+window.skipDriver=()=>{const list=pickups.filter(p=>p.pickupDate===isoDate()&&['pending','collected'].includes(p.status)).sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));if(list.length<2)return toast('To ostatni aktywny punkt');const p=list[0],idx=pickups.findIndex(x=>x.id===p.id);pickups.push(pickups.splice(idx,1)[0]);save();render()}
+
+$('orderForm').addEventListener('submit',e=>{e.preventDefault();const id=$('editId').value,old=id?pickups.find(x=>x.id===id):null;let sig=old?.signature||'';if(canvasHasInk())sig=$('signatureCanvas').toDataURL('image/png');const data=normalize({id:id||uid(),company:$('company').value.trim(),phone:$('phone').value.trim(),address:$('address').value.trim(),pickupDate:$('pickupDate').value,time:$('time').value,customer:$('customer').value.trim(),customerPhone:$('customerPhone').value.trim(),reg:$('reg').value.trim(),vehicle:$('vehicle').value.trim(),quantity:$('quantity').value,jobNo:$('jobNo').value.trim(),jobValue:$('jobValue').value,items:$('items').value.trim(),notes:$('notes').value.trim(),status:$('status').value,assignedTo:$('assignedTo').value,assignedName:(teamMembers().find(m=>m.id===$('assignedTo').value)?.name||''),photos:pendingPhotos,signature:sig,createdAt:old?.createdAt||Date.now(),collectedAt:old?.collectedAt||null,completedAt:old?.completedAt||null});if(id)pickups=pickups.map(x=>x.id===id?data:x);else pickups.push(data);addActivity(id?`Zmieniono zlecenie ${data.company}`:`Dodano zlecenie ${data.company}`,meta.driverName||'Właściciel');save();closeModal('orderModal');render();toast(id?'Zlecenie zapisane':'Dodano zlecenie')});
+$('workshopForm').addEventListener('submit',e=>{e.preventDefault();meta.workshops.push({id:uid(),name:$('wName').value.trim(),address:$('wAddress').value.trim(),phone:$('wPhone').value.trim(),notes:$('wNotes').value.trim()});save();$('workshopForm').reset();closeModal('workshopModal');render();toast('Warsztat zapisany')});
+$('inventoryForm').addEventListener('submit',e=>{e.preventDefault();pro.inventory.push({id:uid(),name:$('invName').value.trim(),qty:Number($('invQty').value)||1,jobNo:$('invJob').value.trim(),reg:$('invReg').value.trim(),price:Number($('invPrice').value)||0,status:$('invStatus').value,notes:$('invNotes').value.trim(),createdAt:Date.now()});save();$('inventoryForm').reset();closeModal('inventoryModal');renderInventory();toast('Część dodana')});
+$('expenseForm').addEventListener('submit',e=>{e.preventDefault();pro.expenses.push({id:uid(),date:$('expDate').value,category:$('expCategory').value,amount:Number($('expAmount').value)||0,jobNo:$('expJob').value.trim(),note:$('expNote').value.trim()});save();$('expenseForm').reset();closeModal('expenseModal');renderExpenses();renderReports();toast('Wydatek zapisany')});
+
+document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>closeModal(b.dataset.close)));
+document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.nav)));
+document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.go)));
+['newOrderBtn','quickAddTop','newRouteOrder','newOrderOrders'].forEach(id=>$(id).addEventListener('click',()=>openNew()));
+$('addTomorrow').addEventListener('click',()=>openNew(tomorrowIso()));$('addWorkshopBtn').addEventListener('click',()=>openModal('workshopModal'));$('newInventoryBtn').addEventListener('click',()=>openModal('inventoryModal'));$('newExpenseBtn').addEventListener('click',()=>{$('expDate').value=isoDate();openModal('expenseModal')});
+$('driverModeTop').addEventListener('click',()=>{$('driverOverlay').classList.add('open');renderDriver()});$('openDriverBtn').addEventListener('click',()=>{$('driverOverlay').classList.add('open');renderDriver()});$('closeDriver').addEventListener('click',()=>$('driverOverlay').classList.remove('open'));$('openFullRoute').addEventListener('click',()=>{const u=wholeRouteUrl();u?window.open(u,'_blank'):toast('Brak punktów do nawigacji')});
+document.querySelectorAll('#dayFilters .filter').forEach(b=>b.addEventListener('click',()=>{routeDay=b.dataset.day;document.querySelectorAll('#dayFilters .filter').forEach(x=>x.classList.toggle('active',x===b));render()}));document.querySelectorAll('#statusFilters .filter').forEach(b=>b.addEventListener('click',()=>{routeStatus=b.dataset.status;document.querySelectorAll('#statusFilters .filter').forEach(x=>x.classList.toggle('active',x===b));render()}));
+$('routeSearch').addEventListener('input',e=>{routeSearch=e.target.value;render()});$('ordersSearch').addEventListener('input',e=>{ordersSearch=e.target.value;renderOrders()});$('clearOrdersSearch').addEventListener('click',()=>{$('ordersSearch').value='';ordersSearch='';renderOrders()});$('workshopSearch').addEventListener('input',e=>{workshopSearch=e.target.value;renderWorkshops()});$('clearWorkshopSearch').addEventListener('click',()=>{$('workshopSearch').value='';workshopSearch='';renderWorkshops()});$('historySearch').addEventListener('input',e=>{historySearch=e.target.value;renderHistory()});$('clearHistorySearch').addEventListener('click',()=>{$('historySearch').value='';historySearch='';renderHistory()});$('inventorySearch').addEventListener('input',e=>{inventorySearch=e.target.value;renderInventory()});$('clearInventorySearch').addEventListener('click',()=>{$('inventorySearch').value='';inventorySearch='';renderInventory()});$('customerSearch').addEventListener('input',e=>{customerSearch=e.target.value;renderCustomers()});$('clearCustomerSearch').addEventListener('click',()=>{$('customerSearch').value='';customerSearch='';renderCustomers()});
+document.querySelectorAll('[data-report]').forEach(b=>b.addEventListener('click',()=>{reportRange=b.dataset.report;document.querySelectorAll('[data-report]').forEach(x=>x.classList.toggle('active',x===b));renderReports()}));
+
+$('driverNameInput').value=meta.driverName;$('saveDriverName').addEventListener('click',()=>{meta.driverName=$('driverNameInput').value.trim()||'Kierowca';localStorage.setItem('driverName',meta.driverName);save();toast('Nazwa kierowcy zapisana')});
+$('exportBtn').addEventListener('click',()=>{const data={app:'Auto Body Manager PRO',version:'2.0',exportedAt:new Date().toISOString(),pickups,meta,pro};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`auto-body-manager-pro2-backup-${isoDate()}.json`;a.click();URL.revokeObjectURL(a.href)});
+$('importBtn').addEventListener('click',()=>$('importInput').click());$('importInput').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text()),inc=Array.isArray(d)?d:d.pickups;if(!Array.isArray(inc))throw 0;if(!confirm(`Wczytać ${inc.length} zleceń? Obecne dane zostaną zastąpione.`))return;pickups=inc.map(normalize);if(d.meta)meta={...meta,...d.meta};if(d.pro)pro={inventory:Array.isArray(d.pro.inventory)?d.pro.inventory:[],expenses:Array.isArray(d.pro.expenses)?d.pro.expenses:[]};save();render();toast('Kopia wczytana')}catch(_){alert('Nie udało się odczytać pliku kopii.')}e.target.value=''});
+$('shareBtn').addEventListener('click',async()=>{const list=todayItems().filter(p=>p.status!=='delivered'),text=['Auto Body Manager PRO — dzisiejsza trasa',...list.map((p,i)=>`${i+1}. ${p.time||'--:--'} — ${p.company} — ${p.address}${p.reg?' — '+p.reg:''}`)].join('\n');try{if(navigator.share)await navigator.share({title:'Dzisiejsza trasa',text});else{await navigator.clipboard.writeText(text);toast('Trasa skopiowana')}}catch(_){}});
+$('clearDataBtn').addEventListener('click',()=>{if(confirm('Usunąć wszystkie lokalne zlecenia, warsztaty, magazyn i koszty z tego urządzenia?')){pickups=[];meta.workshops=[];pro={inventory:[],expenses:[]};save();render();toast('Dane usunięte')}});
+
+$('orderPhotos').addEventListener('change',async e=>{const files=[...e.target.files].slice(0,3);pendingPhotos=[];for(const f of files){pendingPhotos.push(await resizeImage(f,900,0.72))}renderPhotoPreview()});
+function resizeImage(file,max=900,quality=.72){return new Promise((resolve,reject)=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{let w=img.width,h=img.height;if(Math.max(w,h)>max){const r=max/Math.max(w,h);w=Math.round(w*r);h=Math.round(h*r)}const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);URL.revokeObjectURL(url);resolve(c.toDataURL('image/jpeg',quality))};img.onerror=reject;img.src=url})}
+const sigCanvas=$('signatureCanvas'),sigCtx=sigCanvas.getContext('2d');clearSignatureCanvas();sigCtx.lineWidth=4;sigCtx.lineCap='round';sigCtx.strokeStyle='#111';let drawing=false;
+function sigPos(e){const r=sigCanvas.getBoundingClientRect(),p=e.touches?e.touches[0]:e;return {x:(p.clientX-r.left)*(sigCanvas.width/r.width),y:(p.clientY-r.top)*(sigCanvas.height/r.height)}}
+function sigStart(e){e.preventDefault();drawing=true;const p=sigPos(e);sigCtx.beginPath();sigCtx.moveTo(p.x,p.y)}
+function sigMove(e){if(!drawing)return;e.preventDefault();const p=sigPos(e);sigCtx.lineTo(p.x,p.y);sigCtx.stroke();signatureChanged=true}
+function sigEnd(){drawing=false}
+['mousedown','touchstart'].forEach(ev=>sigCanvas.addEventListener(ev,sigStart,{passive:false}));['mousemove','touchmove'].forEach(ev=>sigCanvas.addEventListener(ev,sigMove,{passive:false}));['mouseup','mouseleave','touchend'].forEach(ev=>sigCanvas.addEventListener(ev,sigEnd));$('clearSignature').addEventListener('click',clearSignatureCanvas);
+
+
+
+
+$('startDayBtn').addEventListener('click',async()=>{driverDayStarted=true;localStorage.setItem('abmDriverDay','1');const now=Date.now();myJobs().forEach(p=>{if(!p.startedAt)p.startedAt=now});save();renderDriverLive();await pushActivity('Rozpoczął trasę');if(isDriver()){await syncCloud(true);startLocation()}});
+$('stopDayBtn').addEventListener('click',async()=>{driverDayStarted=false;localStorage.removeItem('abmDriverDay');stopLocation();renderDriverLive();await pushActivity('Zakończył dzień');toast('Dzień zakończony')});
+$('shareLocationBtn').addEventListener('click',()=>startLocation());
+$('copyInviteBtn').addEventListener('click',async()=>{const c=cloudWorkspace?.invite_code||'';if(!c)return;await navigator.clipboard.writeText(c);toast('Kod zespołu skopiowany')});
+$('joinTeamBtn').addEventListener('click',async()=>{
+  if(!sb||!cloudUser)return alert('Najpierw zaloguj się.');
+  const code=$('joinCode').value.trim(),phone=$('joinPhone').value.trim();
+  if(!code)return alert('Wpisz kod zespołu.');
+  const {data,error}=await sb.rpc('join_workspace_by_code',{code,member_name:meta.driverName||cloudUser.email?.split('@')[0]||'Kierowca',member_phone:phone});
+  if(error)return alert('Nie udało się dołączyć: '+error.message);
+  await loadWorkspace();await pullCloud(false);await startRealtime();applyRoleMode();render();toast('Dołączono do zespołu');
+});
+driverDayStarted=localStorage.getItem('abmDriverDay')==='1';
+
+$('addTeamBtn').addEventListener('click',()=>openModal('teamModal'));
+$('teamForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const member={id:uid(),name:$('teamName').value.trim(),email:$('teamEmail').value.trim(),phone:$('teamPhone').value.trim(),role:$('teamRole').value};
+  pro.team=pro.team||[];pro.team.push(member);
+  addActivity(`Dodano do zespołu: ${member.name} (${member.role})`,meta.driverName||'Właściciel');
+  save();$('teamForm').reset();closeModal('teamModal');render();toast('Pracownik dodany');
+});
+
+$('accountTop').addEventListener('click',()=>showView('cloud'));
+$('loginBtn').addEventListener('click',async()=>{
+  if(!sb)return alert('Moduł chmury nie został załadowany.');
+  const email=$('authEmail').value.trim(),password=$('authPassword').value;
+  if(!email||!password)return alert('Wpisz e-mail i hasło.');
+  setCloudStatus('busy','Logowanie…');
+  const {data,error}=await sb.auth.signInWithPassword({email,password});
+  if(error){setCloudStatus('off','Lokalnie');return alert('Nie udało się zalogować: '+error.message)}
+  cloudUser=data.user;await loadWorkspace();updateAuthUI();await syncCloud(false);
+});
+$('signupBtn').addEventListener('click',async()=>{
+  if(!sb)return alert('Moduł chmury nie został załadowany.');
+  const email=$('authEmail').value.trim(),password=$('authPassword').value;
+  if(!email||password.length<6)return alert('Wpisz e-mail i hasło minimum 6 znaków.');
+  setCloudStatus('busy','Rejestracja…');
+  const {data,error}=await sb.auth.signUp({email,password,options:{data:{full_name:meta.driverName||'Kierowca'}}});
+  if(error){setCloudStatus('off','Lokalnie');return alert('Nie udało się utworzyć konta: '+error.message)}
+  cloudUser=data.user||null;updateAuthUI();
+  alert(data.session?'Konto utworzone. Możesz synchronizować dane.':'Konto utworzone. Sprawdź e-mail i potwierdź rejestrację, a potem się zaloguj.');
+});
+$('logoutBtn').addEventListener('click',async()=>{if(sb)await sb.auth.signOut();cloudUser=null;cloudWorkspace=null;updateAuthUI();toast('Wylogowano')});
+$('syncNowBtn').addEventListener('click',()=>syncCloud(false));
+const savedSync=localStorage.getItem('autoBodyManagerLastSync');
+if(savedSync&&$('lastSyncText'))$('lastSyncText').textContent='Ostatnia synchronizacja: '+new Date(savedSync).toLocaleString('pl-PL');
+initCloud();
+
+$('todayLabel').textContent=new Intl.DateTimeFormat('pl-PL',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date());
+render();
+})();
+</script>
+</body>
+</html>

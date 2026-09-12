@@ -278,20 +278,20 @@ body.driver-mode .route-heading{
         <h1>Trasa kierowcy</h1>
         <p id="todayLabel" class="muted"></p>
       </div>
-      <div class="top-actions"><button class="driver-pill" id="driverBtn" type="button">ð¤ <span id="driverName">Kierowca</span></button><button class="driver-mode-btn" id="driverModeBtn" type="button">ð DRIVER</button></div>
+      <div class="top-actions"><button class="driver-pill" id="driverBtn" type="button">👤 <span id="driverName">Kierowca</span></button><button class="driver-mode-btn" id="driverModeBtn" type="button">🚚 DRIVER</button></div>
     </header>
 
     <section class="stats-grid" aria-label="Podsumowanie trasy">
-      <article class="stat-card"><span class="stat-icon">ð</span><div><strong id="statAll">0</strong><span>Wszystkie</span></div></article>
-      <article class="stat-card"><span class="stat-icon">ð</span><div><strong id="statActive">0</strong><span>Do zrobienia</span></div></article>
-      <article class="stat-card"><span class="stat-icon">â</span><div><strong id="statDone">0</strong><span>Gotowe</span></div></article>
+      <article class="stat-card"><span class="stat-icon">📍</span><div><strong id="statAll">0</strong><span>Wszystkie</span></div></article>
+      <article class="stat-card"><span class="stat-icon">🚚</span><div><strong id="statActive">0</strong><span>Do zrobienia</span></div></article>
+      <article class="stat-card"><span class="stat-icon">✅</span><div><strong id="statDone">0</strong><span>Gotowe</span></div></article>
     </section>
 
     <main>
       <section class="panel add-panel">
         <button class="panel-title collapsible" id="toggleForm" type="button" aria-expanded="true">
-          <span><span class="title-icon">ï¼</span> Nowy odbiÃ³r</span>
-          <span id="toggleArrow">â</span>
+          <span><span class="title-icon">＋</span> Nowy odbiór</span>
+          <span id="toggleArrow">⌃</span>
         </button>
 
         <form id="pickupForm" autocomplete="off">
@@ -309,19 +309,19 @@ body.driver-mode .route-heading{
             <label class="field">Telefon
               <input id="phone" type="tel" inputmode="tel" placeholder="np. 07700 900123">
             </label>
-            <label class="field">IloÅÄ czÄÅci
+            <label class="field">Ilość części
               <input id="quantity" type="number" inputmode="numeric" min="0" step="1" placeholder="np. 5">
             </label>
             <label class="field wide">Co odbierasz?
-              <input id="items" type="text" placeholder="np. zderzaki, drzwi, bÅotnik">
+              <input id="items" type="text" placeholder="np. zderzaki, drzwi, błotnik">
             </label>
             <label class="field wide">Uwagi
-              <textarea id="notes" placeholder="np. zapytaÄ o fakturÄ, odbiÃ³r z tylnej bramy"></textarea>
+              <textarea id="notes" placeholder="np. zapytać o fakturę, odbiór z tylnej bramy"></textarea>
             </label>
           </div>
           <div class="form-actions">
-            <button class="btn btn-primary" id="saveBtn" type="submit">ï¼ Dodaj do trasy</button>
-            <button class="btn btn-ghost hidden" id="cancelEditBtn" type="button">Anuluj edycjÄ</button>
+            <button class="btn btn-primary" id="saveBtn" type="submit">＋ Dodaj do trasy</button>
+            <button class="btn btn-ghost hidden" id="cancelEditBtn" type="button">Anuluj edycję</button>
           </div>
         </form>
       </section>
@@ -332,7 +332,7 @@ body.driver-mode .route-heading{
             <p class="eyebrow">DZISIAJ</p>
             <h2>Dzisiejsza trasa</h2>
           </div>
-          <button class="icon-btn" id="moreBtn" type="button" aria-label="Opcje">â¢â¢â¢</button>
+          <button class="icon-btn" id="moreBtn" type="button" aria-label="Opcje">•••</button>
         </div>
 
         <div class="filter-row">
@@ -342,24 +342,24 @@ body.driver-mode .route-heading{
         </div>
 
         <div class="route-tools">
-  <button class="btn btn-map" id="openWholeRouteBtn" type="button">ðºï¸ OtwÃ³rz caÅÄ trasÄ</button>
-  <button class="btn btn-ghost" id="sortRouteBtn" type="button">âï¸ UÅÃ³Å¼ wg godziny</button>
+  <button class="btn btn-map" id="openWholeRouteBtn" type="button">🗺️ Otwórz całą trasę</button>
+  <button class="btn btn-ghost" id="sortRouteBtn" type="button">↕️ Ułóż wg godziny</button>
 </div>
         <div id="nextStopCard" class="next-stop-card hidden"></div>
         <div id="route" class="route-list"></div>
       </section>
 
-      <section class="panel workshops-panel"><div class="route-heading"><div><p class="eyebrow">SZYBKI DOSTÄP</p><h2>Zapisane warsztaty</h2></div></div><div id="workshops" class="workshop-chips"></div></section><section class="panel tools-panel hidden" id="toolsPanel">
-        <h2>NarzÄdzia</h2>
+      <section class="panel workshops-panel"><div class="route-heading"><div><p class="eyebrow">SZYBKI DOSTĘP</p><h2>Zapisane warsztaty</h2></div></div><div id="workshops" class="workshop-chips"></div></section><section class="panel tools-panel hidden" id="toolsPanel">
+        <h2>Narzędzia</h2>
         <div class="tool-grid">
-          <button class="btn btn-ghost" id="exportBtn" type="button">â¬ï¸ Eksport danych</button>
-          <label class="btn btn-ghost file-btn">â¬ï¸ Import danych<input id="importInput" type="file" accept="application/json"></label>
-          <button class="btn btn-danger" id="clearBtn" type="button">ðï¸ WyczyÅÄ trasÄ</button>
+          <button class="btn btn-ghost" id="exportBtn" type="button">⬇️ Eksport danych</button>
+          <label class="btn btn-ghost file-btn">⬆️ Import danych<input id="importInput" type="file" accept="application/json"></label>
+          <button class="btn btn-danger" id="clearBtn" type="button">🗑️ Wyczyść trasę</button>
         </div>
       </section>
     </main>
 
-    <footer>Auto Body Manager v5 â¢ dane zapisujÄ siÄ na tym urzÄdzeniu</footer>
+    <footer>Auto Body Manager v5 • dane zapisują się na tym urządzeniu</footer>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -461,7 +461,7 @@ body.driver-mode .route-heading{
         if (!p.company || !p.address || seen.has(k)) return false;
         seen.add(k); return true;
       }).slice(0,12);
-      box.innerHTML = list.length ? list.map(p => `<button class="workshop-chip" type="button" onclick="reuseWorkshop('${p.id}')">ð­ ${escapeHtml(p.company)}</button>`).join('') : '<span class="muted small">Warsztaty pojawiÄ siÄ tutaj po dodaniu odbiorÃ³w.</span>';
+      box.innerHTML = list.length ? list.map(p => `<button class="workshop-chip" type="button" onclick="reuseWorkshop('${p.id}')">🏭 ${escapeHtml(p.company)}</button>`).join('') : '<span class="muted small">Warsztaty pojawią się tutaj po dodaniu odbiorów.</span>';
     }
     window.reuseWorkshop = function(id) {
       const p = pickups.find(x => x.id === id); if (!p) return;
@@ -479,7 +479,7 @@ body.driver-mode .route-heading{
     function setDriverMode(on) {
       document.body.classList.toggle('driver-mode', on);
       localStorage.setItem('driverMode', on?'1':'0');
-      $('driverModeBtn').textContent = on ? 'â WYJDÅ¹' : 'ð DRIVER';
+      $('driverModeBtn').textContent = on ? '✕ WYJDŹ' : '🚚 DRIVER';
       if(on){ currentFilter='pending'; document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x.dataset.filter==='pending')); }
       render();
     }
@@ -504,18 +504,18 @@ body.driver-mode .route-heading{
       const tel = (p.phone || '').replace(/\s+/g,'');
       box.classList.remove('hidden');
       box.innerHTML = `
-        <div class="next-stop-label">NASTÄPNY PUNKT</div>
+        <div class="next-stop-label">NASTĘPNY PUNKT</div>
         <div class="next-stop-main">
           <div>
-            <h3>${escapeHtml(p.company || 'OdbiÃ³r')}</h3>
+            <h3>${escapeHtml(p.company || 'Odbiór')}</h3>
             <p>${escapeHtml(p.address || '')}</p>
-            <strong>${p.time ? 'ð ' + escapeHtml(p.time) : 'ð Bez godziny'}</strong>
+            <strong>${p.time ? '🕒 ' + escapeHtml(p.time) : '🕒 Bez godziny'}</strong>
           </div>
         </div>
         <div class="next-stop-actions">
-          <button class="action nav" type="button" onclick="navigatePickup('${p.id}')">ð§­ Nawiguj</button>
-          ${tel ? `<a class="action call" href="tel:${tel}">ð ZadzwoÅ</a>` : ''}
-          <button class="action complete" type="button" onclick="completePickup('${p.id}')">â Odebrane</button>
+          <button class="action nav" type="button" onclick="navigatePickup('${p.id}')">🧭 Nawiguj</button>
+          ${tel ? `<a class="action call" href="tel:${tel}">📞 Zadzwoń</a>` : ''}
+          <button class="action complete" type="button" onclick="completePickup('${p.id}')">✅ Odebrane</button>
         </div>`;
     }
 
@@ -566,8 +566,8 @@ body.driver-mode .route-heading{
       renderNextStop();
       const list = filteredPickups();
       if (!list.length) {
-        const msg = currentFilter === 'done' ? 'Nie ma jeszcze zakoÅczonych odbiorÃ³w.' : 'Brak zaplanowanych odbiorÃ³w. Dodaj pierwszy punkt trasy.';
-        routeEl.innerHTML = `<div class="empty-state"><div class="empty-icon">ð</div><strong>${msg}</strong><span>Twoja trasa pojawi siÄ tutaj.</span></div>`;
+        const msg = currentFilter === 'done' ? 'Nie ma jeszcze zakończonych odbiorów.' : 'Brak zaplanowanych odbiorów. Dodaj pierwszy punkt trasy.';
+        routeEl.innerHTML = `<div class="empty-state"><div class="empty-icon">🚚</div><strong>${msg}</strong><span>Twoja trasa pojawi się tutaj.</span></div>`;
         return;
       }
 
@@ -576,7 +576,7 @@ body.driver-mode .route-heading{
         const phoneHref = String(p.phone || '').replace(/[^+\d]/g, '');
         return `
           <article class="pickup-card ${p.status === 'done' ? 'done' : ''}">
-            <div class="pickup-number">${p.status === 'done' ? 'â' : index + 1}</div>
+            <div class="pickup-number">${p.status === 'done' ? '✓' : index + 1}</div>
             <div class="pickup-content">
               <div class="pickup-head">
                 <div>
@@ -585,15 +585,15 @@ body.driver-mode .route-heading{
                 </div>
                 <span class="status ${p.status}">${p.status === 'done' ? 'ZROBIONE' : 'DO ODBIORU'}</span>
               </div>
-              <a class="address" href="${mapsUrl}" target="_blank" rel="noopener">ð ${escapeHtml(p.address)}</a>
-              ${(p.quantity || p.items) ? `<div class="pickup-detail">ð¦ ${p.quantity ? escapeHtml(p.quantity) + ' szt.' : ''}${p.quantity && p.items ? ' â¢ ' : ''}${escapeHtml(p.items)}</div>` : ''}
-              ${p.notes ? `<div class="pickup-note">ð ${escapeHtml(p.notes)}</div>` : ''}
+              <a class="address" href="${mapsUrl}" target="_blank" rel="noopener">📍 ${escapeHtml(p.address)}</a>
+              ${(p.quantity || p.items) ? `<div class="pickup-detail">📦 ${p.quantity ? escapeHtml(p.quantity) + ' szt.' : ''}${p.quantity && p.items ? ' • ' : ''}${escapeHtml(p.items)}</div>` : ''}
+              ${p.notes ? `<div class="pickup-note">📝 ${escapeHtml(p.notes)}</div>` : ''}
               <div class="pickup-actions">
-                <a class="action nav" href="${mapsUrl}" target="_blank" rel="noopener">ð§­ Nawiguj</a>
-                ${p.phone ? `<a class="action" href="tel:${phoneHref}">ð ZadzwoÅ</a>` : ''}
-                <button class="action" type="button" onclick="editPickup('${p.id}')">âï¸ Edytuj</button>
-                <button class="action ${p.status === 'done' ? '' : 'complete'}" type="button" onclick="toggleDone('${p.id}')">${p.status === 'done' ? 'â© Cofnij' : 'â Gotowe'}</button>
-                <button class="action delete" type="button" onclick="deletePickup('${p.id}')">ð UsuÅ</button>
+                <a class="action nav" href="${mapsUrl}" target="_blank" rel="noopener">🧭 Nawiguj</a>
+                ${p.phone ? `<a class="action" href="tel:${phoneHref}">📞 Zadzwoń</a>` : ''}
+                <button class="action" type="button" onclick="editPickup('${p.id}')">✏️ Edytuj</button>
+                <button class="action ${p.status === 'done' ? '' : 'complete'}" type="button" onclick="toggleDone('${p.id}')">${p.status === 'done' ? '↩ Cofnij' : '✓ Gotowe'}</button>
+                <button class="action delete" type="button" onclick="deletePickup('${p.id}')">🗑 Usuń</button>
               </div>
             </div>
           </article>`;
@@ -605,7 +605,7 @@ body.driver-mode .route-heading{
       const company = $('company').value.trim();
       const address = $('address').value.trim();
       const time = $('time').value;
-      if (!company || !address) return showToast('UzupeÅnij firmÄ i adres.');
+      if (!company || !address) return showToast('Uzupełnij firmę i adres.');
 
       const data = {
         company, address, time,
@@ -620,7 +620,7 @@ body.driver-mode .route-heading{
         showToast('Zmiany zapisane.');
       } else {
         pickups.push(normalizePickup({ id: uid(), ...data }));
-        showToast('Dodano odbiÃ³r do trasy.');
+        showToast('Dodano odbiór do trasy.');
       }
       save();
       resetForm();
@@ -630,7 +630,7 @@ body.driver-mode .route-heading{
     function resetForm() {
       form.reset();
       $('editingId').value = '';
-      $('saveBtn').textContent = 'ï¼ Dodaj do trasy';
+      $('saveBtn').textContent = '＋ Dodaj do trasy';
       $('cancelEditBtn').classList.add('hidden');
     }
 
@@ -639,11 +639,11 @@ body.driver-mode .route-heading{
       if (!p) return;
       ['company','address','time','phone','quantity','items','notes'].forEach(key => $(key).value = p[key] ?? '');
       $('editingId').value = p.id;
-      $('saveBtn').textContent = 'ð¾ Zapisz zmiany';
+      $('saveBtn').textContent = '💾 Zapisz zmiany';
       $('cancelEditBtn').classList.remove('hidden');
       form.classList.remove('collapsed');
       $('toggleForm').setAttribute('aria-expanded', 'true');
-      $('toggleArrow').textContent = 'â';
+      $('toggleArrow').textContent = '⌃';
       document.querySelector('.add-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
 
@@ -658,9 +658,9 @@ body.driver-mode .route-heading{
 
     window.deletePickup = function(id) {
       const p = pickups.find(x => x.id === id);
-      if (!p || !confirm(`UsunÄÄ odbiÃ³r: ${p.company}?`)) return;
+      if (!p || !confirm(`Usunąć odbiór: ${p.company}?`)) return;
       pickups = pickups.filter(x => x.id !== id);
-      save(); render(); showToast('OdbiÃ³r usuniÄty.');
+      save(); render(); showToast('Odbiór usunięty.');
     };
 
     $('cancelEditBtn').addEventListener('click', resetForm);
@@ -675,12 +675,12 @@ body.driver-mode .route-heading{
     $('toggleForm').addEventListener('click', () => {
       const collapsed = form.classList.toggle('collapsed');
       $('toggleForm').setAttribute('aria-expanded', String(!collapsed));
-      $('toggleArrow').textContent = collapsed ? 'â' : 'â';
+      $('toggleArrow').textContent = collapsed ? '⌄' : '⌃';
     });
 
     $('driverBtn').addEventListener('click', () => {
       const old = localStorage.getItem('driverName') || localStorage.getItem('driver') || '';
-      const name = prompt('Podaj imiÄ kierowcy:', old);
+      const name = prompt('Podaj imię kierowcy:', old);
       if (name !== null) {
         localStorage.setItem('driverName', name.trim());
         updateHeader();
@@ -689,20 +689,20 @@ body.driver-mode .route-heading{
 
 
     $('driverModeBtn').addEventListener('click', () => setDriverMode(!document.body.classList.contains('driver-mode')));
-    $('openWholeRouteBtn').addEventListener('click', () => { const u=wholeRouteUrl(); if(!u) return showToast('Brak punktÃ³w do odbioru.'); window.open(u,'_blank','noopener'); });
-    $('sortRouteBtn').addEventListener('click', () => { pickups.sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99')); save(); render(); showToast('Trasa uÅoÅ¼ona wedÅug godziny.'); });
+    $('openWholeRouteBtn').addEventListener('click', () => { const u=wholeRouteUrl(); if(!u) return showToast('Brak punktów do odbioru.'); window.open(u,'_blank','noopener'); });
+    $('sortRouteBtn').addEventListener('click', () => { pickups.sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99')); save(); render(); showToast('Trasa ułożona według godziny.'); });
 
 
     $('moreBtn').addEventListener('click', () => $('toolsPanel').classList.toggle('hidden'));
 
     $('clearBtn').addEventListener('click', () => {
-      if (!pickups.length) return showToast('Trasa jest juÅ¼ pusta.');
-      if (!confirm('Na pewno usunÄÄ wszystkie punkty trasy?')) return;
+      if (!pickups.length) return showToast('Trasa jest już pusta.');
+      if (!confirm('Na pewno usunąć wszystkie punkty trasy?')) return;
       pickups = []; save(); render(); showToast('Trasa wyczyszczona.');
     });
 
     $('exportBtn').addEventListener('click', () => {
-      const payload = JSON.stringify({ version: 4.2, exportedAt: new Date().toISOString(), pickups }, null, 2);
+      const payload = JSON.stringify({ version: 5, exportedAt: new Date().toISOString(), pickups }, null, 2);
       const blob = new Blob([payload], { type: 'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
@@ -722,7 +722,7 @@ body.driver-mode .route-heading{
         pickups = incoming.map(normalizePickup);
         save(); render(); showToast('Dane zaimportowane.');
       } catch (_) {
-        alert('Nie udaÅo siÄ wczytaÄ pliku. Wybierz eksport z Auto Body Manager.');
+        alert('Nie udało się wczytać pliku. Wybierz eksport z Auto Body Manager.');
       }
       e.target.value = '';
     });

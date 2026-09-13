@@ -4,15 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#07101d">
-<title>Auto Body Manager</title>
-<meta name="application-name" content="Auto Body Manager">
-<meta name="apple-mobile-web-app-title" content="Auto Body Manager">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="manifest" href="/manifest.webmanifest?v=12">
-<link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png?v=12">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=12">
-<link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png?v=12">
+<title>Auto Body Manager PRO 5.1 TEAM JOIN</title>
 <style>
 :root{
   --bg:#07101d; --bg2:#0b1524; --panel:#111f32; --panel2:#172941;
@@ -90,6 +82,8 @@ button{cursor:pointer}
 .driver-focus h3{margin:0 0 6px}.driver-focus .bigstate{font-size:34px;font-weight:950;margin:8px 0}
 .map-box{border:1px solid #2f4b69;border-radius:18px;background:#0a1726;min-height:180px;padding:14px}
 .location-row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid #20364f}.location-row:last-child{border-bottom:0}
+.live-map{height:360px;border-radius:16px;overflow:hidden;border:1px solid #31516f;background:#08131f;margin-bottom:12px}.live-map .leaflet-popup-content-wrapper,.live-map .leaflet-popup-tip{background:#0d2034;color:#fff}.live-map .leaflet-control-zoom a{background:#10243b;color:#fff;border-color:#31516f}.live-map .leaflet-control-attribution{font-size:9px}.driver-marker{background:#2f7fe8;border:3px solid #fff;width:20px!important;height:20px!important;border-radius:50%;box-shadow:0 0 0 5px rgba(47,127,232,.25)}
+@media(max-width:700px){.live-map{height:320px}}
 .invite-box{border:1px dashed #4e6a88;background:#0c1a2b;border-radius:18px;padding:15px}.invite-code{font-size:28px;font-weight:950;letter-spacing:3px}
 .mode-driver .owner-only{display:none!important}.mode-driver .driver-only{display:block!important}.driver-only{display:none}
 @media(max-width:760px){.invite-code{font-size:23px}}
@@ -106,12 +100,14 @@ button{cursor:pointer}
 @media(max-width:700px){.attention-grid{grid-template-columns:1fr 1fr}.install-card{align-items:flex-start;flex-direction:column}.workshop-profile{grid-template-columns:1fr}}
 
 </style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <header class="topbar">
   <div class="top-inner">
-    <div class="brand"><div class="logo">🚚</div><div><small>AUTO BODY MANAGER</small><h1>PRO 12.0 COMPLETE</h1></div></div>
+    <div class="brand"><div class="logo">🚚</div><div><small>AUTO BODY MANAGER</small><h1>PRO 12.1 LIVE MAP</h1></div></div>
     <div class="top-actions"><div class="cloud-pill" id="cloudPill"><span class="cloud-dot" id="cloudDot"></span><span id="cloudText">Lokalnie</span></div><button class="icon-btn" id="accountTop" title="Konto">👤</button><button class="icon-btn" id="driverModeTop" title="Tryb kierowcy">🛣️</button><button class="icon-btn" id="quickAddTop" title="Nowe zlecenie">＋</button></div>
   </div>
 </header>
@@ -315,13 +311,13 @@ button{cursor:pointer}
         <div class="invite-box owner-only" style="margin-top:14px">
           <div class="eyebrow">KOD ZESPOŁU</div>
           <div class="invite-code" id="inviteCode">--------</div>
-          <div class="muted">Nowy kierowca może wpisać kod albo otworzyć gotowy link zaproszenia.</div>
-          <div class="actions"><button class="act" id="copyInviteBtn">📋 Kopiuj kod</button><button class="primary" id="shareDriverInviteBtn">📲 Zaproś kierowcę</button><button class="act" id="showInviteQrBtn">▦ Kod QR</button></div>
-          <div id="inviteQrBox" style="display:none;margin-top:12px;text-align:center"><img id="inviteQrImg" alt="Kod QR zaproszenia" style="width:220px;max-width:100%;border-radius:16px;background:#fff;padding:10px"><div class="muted" style="margin-top:8px">Kierowca skanuje kod aparatem telefonu.</div></div>
+          <div class="muted">Nowy kierowca zakłada konto i wpisuje ten kod, aby dołączyć do Twojej firmy.</div>
+          <div class="actions"><button class="act" id="copyInviteBtn">📋 Kopiuj kod</button></div>
         </div>
       </section>
       <section class="panel">
         <div class="panel-head"><div><div class="eyebrow">LIVE</div><h3>Lokalizacje kierowców</h3></div><span class="live-badge"><span class="live-dot"></span>NA ŻYWO</span></div>
+        <div id="liveMap" class="live-map"><div class="empty" style="padding:24px">Mapa pojawi się po odebraniu lokalizacji kierowcy.</div></div>
         <div class="map-box" id="liveLocations"><div class="empty">Brak aktywnych lokalizacji.</div></div>
       </section>
       <section class="panel">
@@ -610,13 +606,24 @@ async function renderCloudTeam(){
     renderTeam();
   }
 }
+let liveMapInstance=null,liveMapLayer=null;
+function renderLiveMap(recent,mm){
+  const el=$('liveMap'); if(!el)return;
+  if(!recent.length){if(liveMapInstance){liveMapInstance.remove();liveMapInstance=null;liveMapLayer=null}el.innerHTML='<div class="empty" style="padding:24px">Brak aktywnych kierowców na mapie.</div>';return}
+  if(!window.L){el.innerHTML='<div class="empty" style="padding:24px">Nie udało się załadować mapy. Lista lokalizacji poniżej nadal działa.</div>';return}
+  if(!liveMapInstance){el.innerHTML='';liveMapInstance=L.map(el,{zoomControl:true});L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(liveMapInstance);liveMapLayer=L.layerGroup().addTo(liveMapInstance)}
+  liveMapLayer.clearLayers(); const bounds=[];
+  recent.forEach(x=>{const m=mm.get(x.user_id),name=m?.display_name||m?.email||'Kierowca',pos=[Number(x.lat),Number(x.lng)];if(!Number.isFinite(pos[0])||!Number.isFinite(pos[1]))return;bounds.push(pos);const icon=L.divIcon({className:'driver-marker',html:'',iconSize:[20,20],iconAnchor:[10,10]});L.marker(pos,{icon}).addTo(liveMapLayer).bindPopup(`<b>🚚 ${esc(name)}</b><br>${new Date(x.updated_at).toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'})} • dokładność ${Math.round(x.accuracy||0)} m`) });
+  if(bounds.length===1)liveMapInstance.setView(bounds[0],16);else if(bounds.length)liveMapInstance.fitBounds(bounds,{padding:[28,28],maxZoom:16});setTimeout(()=>liveMapInstance&&liveMapInstance.invalidateSize(),80)
+}
 async function renderLiveLocations(){
   if(!sb||!cloudWorkspace||!$('liveLocations'))return;
   const {data}=await sb.from('driver_locations').select('user_id,lat,lng,accuracy,updated_at').eq('workspace_id',cloudWorkspace.id).order('updated_at',{ascending:false});
   const members=await refreshMemberships();
   const mm=new Map(members.map(m=>[m.user_id,m]));
   const recent=(data||[]).filter(x=>Date.now()-Date.parse(x.updated_at)<1000*60*30);
-  $('liveLocations').innerHTML=recent.length?recent.map(x=>{const m=mm.get(x.user_id);return `<div class="location-row"><div><b>📍 ${esc(m?.display_name||m?.email||'Kierowca')}</b><div class="muted">${new Date(x.updated_at).toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'})} • dokładność ${Math.round(x.accuracy||0)} m</div></div><button class="act blue" onclick="window.open('https://www.google.com/maps?q=${x.lat},${x.lng}','_blank')">Mapa</button></div>`}).join(''):`<div class="empty">Brak aktywnych lokalizacji z ostatnich 30 minut.</div>`;
+  renderLiveMap(recent,mm);
+  $('liveLocations').innerHTML=recent.length?recent.map(x=>{const m=mm.get(x.user_id);return `<div class="location-row"><div><b>📍 ${esc(m?.display_name||m?.email||'Kierowca')}</b><div class="muted">${new Date(x.updated_at).toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'})} • dokładność ${Math.round(x.accuracy||0)} m</div></div><button class="act blue" onclick="window.open('https://www.google.com/maps?q=${x.lat},${x.lng}','_blank')">Otwórz mapę</button></div>`}).join(''):`<div class="empty">Brak aktywnych lokalizacji z ostatnich 30 minut.</div>`;
 }
 function myJobs(){
   if(!cloudUser)return [];
@@ -671,7 +678,6 @@ function updateAuthUI(){
   $('signedOutBox').style.display=cloudUser?'none':'block';
   $('signedInBox').style.display=cloudUser?'block':'none';
   $('cloudUserEmail').textContent=cloudUser?.email||'—';
-  const pendingInvite=new URLSearchParams(location.search).get('join')||sessionStorage.getItem('abmPendingInvite')||'';if(pendingInvite&&$('joinCode'))$('joinCode').value=pendingInvite;
   $('workspaceName').textContent=(cloudWorkspace?.name||'Auto Body Manager')+(currentMembership?.role?` • ${currentMembership.role.toUpperCase()}`:'');
   setCloudStatus(cloudUser?'on':'off',cloudUser?'Chmura':'Lokalnie');
 }
@@ -784,7 +790,7 @@ async function pullCloud(skipRender=false){
   }catch(err){console.warn('Pull:',err.message)}
 }
 
-function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.dataset.view===v));document.querySelectorAll('.nav-btn').forEach(x=>x.classList.toggle('active',x.dataset.nav===v));const names={dashboard:['CENTRUM DOWODZENIA','Dzień kierowcy'],route:['PLAN DNIA','Trasa'],orders:['BAZA','Zlecenia'],workshops:['KONTAKTY','Warsztaty'],history:['ARCHIWUM','Historia'],settings:['SYSTEM','Ustawienia'],cloud:['CHMURA','Konto i synchronizacja'],team:['ZESPÓŁ','Zespół i przydziały'],driverlive:['DRIVER LIVE','Moja trasa'],inventory:['MAGAZYN','Części'],customers:['KLIENCI','Klienci i auta'],expenses:['KOSZTY','Wydatki'],dispatch:['DYSPOZYTORNIA','Centrum operacyjne'],reports:['RAPORTY','Podsumowanie'],more:['AUTO BODY MANAGER PRO','Więcej']};$('viewEyebrow').textContent=names[v]?.[0]||'AUTO BODY MANAGER';$('viewTitle').textContent=names[v]?.[1]||'PRO 12.0 COMPLETE';window.scrollTo({top:0,behavior:'smooth'})}
+function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.dataset.view===v));document.querySelectorAll('.nav-btn').forEach(x=>x.classList.toggle('active',x.dataset.nav===v));const names={dashboard:['CENTRUM DOWODZENIA','Dzień kierowcy'],route:['PLAN DNIA','Trasa'],orders:['BAZA','Zlecenia'],workshops:['KONTAKTY','Warsztaty'],history:['ARCHIWUM','Historia'],settings:['SYSTEM','Ustawienia'],cloud:['CHMURA','Konto i synchronizacja'],team:['ZESPÓŁ','Zespół i przydziały'],driverlive:['DRIVER LIVE','Moja trasa'],inventory:['MAGAZYN','Części'],customers:['KLIENCI','Klienci i auta'],expenses:['KOSZTY','Wydatki'],dispatch:['DYSPOZYTORNIA','Centrum operacyjne'],reports:['RAPORTY','Podsumowanie'],more:['AUTO BODY MANAGER PRO','Więcej']};$('viewEyebrow').textContent=names[v]?.[0]||'AUTO BODY MANAGER';$('viewTitle').textContent=names[v]?.[1]||'PRO 12.1 LIVE MAP';if(v==='team')setTimeout(()=>{renderLiveLocations();if(liveMapInstance)liveMapInstance.invalidateSize()},120);window.scrollTo({top:0,behavior:'smooth'})}
 function openModal(id){$(id).classList.add('open')}function closeModal(id){$(id).classList.remove('open')}
 function clearSignatureCanvas(){const c=$('signatureCanvas');const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);signatureChanged=false}
 function resetOrder(date=isoDate()){ $('orderForm').reset();$('editId').value='';$('pickupDate').value=date;$('status').value='pending';$('orderModalTitle').textContent='Nowy odbiór';pendingPhotos=[];renderPhotoPreview();clearSignatureCanvas()}
@@ -853,12 +859,7 @@ bindDrawCanvas('pickupSignatureCanvas');bindDrawCanvas('deliverySignatureCanvas'
 $('startDayBtn').addEventListener('click',async()=>{driverDayStarted=true;localStorage.setItem('abmDriverDay','1');const now=Date.now();myJobs().forEach(p=>{if(!p.startedAt)p.startedAt=now});save();renderDriverLive();await pushActivity('Rozpoczął trasę');if(isDriver()){await syncCloud(true);startLocation()}});
 $('stopDayBtn').addEventListener('click',async()=>{driverDayStarted=false;localStorage.removeItem('abmDriverDay');stopLocation();renderDriverLive();await pushActivity('Zakończył dzień');toast('Dzień zakończony')});
 $('shareLocationBtn').addEventListener('click',()=>startLocation());
-function driverInviteUrl(){const c=cloudWorkspace?.invite_code||'';return c?`${location.origin}${location.pathname}?join=${encodeURIComponent(c)}`:''}
-function applyInviteFromUrl(){const code=new URLSearchParams(location.search).get('join');if(!code)return;sessionStorage.setItem('abmPendingInvite',code);if($('joinCode'))$('joinCode').value=code;showView('cloud');toast('Zaproszenie kierowcy gotowe — zaloguj się lub utwórz konto')}
-async function shareDriverInvite(){const url=driverInviteUrl(),code=cloudWorkspace?.invite_code||'';if(!url)return alert('Najpierw zaloguj się jako właściciel.');const text=`Dołącz do mojego zespołu w Auto Body Manager jako kierowca. Kod: ${code}`;try{if(navigator.share)await navigator.share({title:'Auto Body Manager — zaproszenie kierowcy',text,url});else{await navigator.clipboard.writeText(url);toast('Link zaproszenia skopiowany')}}catch(_){}}
 $('copyInviteBtn').addEventListener('click',async()=>{const c=cloudWorkspace?.invite_code||'';if(!c)return;await navigator.clipboard.writeText(c);toast('Kod zespołu skopiowany')});
-$('shareDriverInviteBtn')?.addEventListener('click',shareDriverInvite);
-$('showInviteQrBtn')?.addEventListener('click',()=>{const url=driverInviteUrl();if(!url)return alert('Najpierw zaloguj się jako właściciel.');const box=$('inviteQrBox'),img=$('inviteQrImg');img.src='https://api.qrserver.com/v1/create-qr-code/?size=440x440&data='+encodeURIComponent(url);box.style.display=box.style.display==='none'?'block':'none'});
 $('joinTeamBtn').addEventListener('click',async()=>{
   if(!sb||!cloudUser)return alert('Najpierw zaloguj się.');
   const code=$('joinCode').value.trim(),phone=$('joinPhone').value.trim();
@@ -869,7 +870,7 @@ $('joinTeamBtn').addEventListener('click',async()=>{
   const {data:joined,error:joinedError}=await sb.from('workspace_members').select('workspace_id,role,display_name,email,phone,workspaces(id,name,owner_id,invite_code)').eq('workspace_id',joinedId).eq('user_id',cloudUser.id).single();
   if(joinedError)return alert('Dołączono, ale nie udało się otworzyć zespołu: '+joinedError.message);
   currentMembership=joined;cloudWorkspace=joined.workspaces;
-  $('joinCode').value='';sessionStorage.removeItem('abmPendingInvite');history.replaceState({},'',location.pathname);
+  $('joinCode').value='';
   await pullCloud(false);await renderCloudTeam();await startRealtime();applyRoleMode();updateAuthUI();render();toast('Dołączono jako kierowca');
 });
 driverDayStarted=localStorage.getItem('abmDriverDay')==='1';
@@ -908,7 +909,6 @@ $('syncNowBtn').addEventListener('click',()=>syncCloud(false));
 const savedSync=localStorage.getItem('autoBodyManagerLastSync');
 if(savedSync&&$('lastSyncText'))$('lastSyncText').textContent='Ostatnia synchronizacja: '+new Date(savedSync).toLocaleString('pl-PL');
 let deferredInstall=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;$('installCard')?.classList.add('show');$('installText').textContent='Android: zainstaluj aplikację jednym przyciskiem.'});function updateOnline(){const off=!navigator.onLine;$('offlinePill')?.classList.toggle('show',off)}window.addEventListener('online',updateOnline);window.addEventListener('offline',updateOnline);updateOnline();$('installBtn')?.addEventListener('click',async()=>{if(deferredInstall){deferredInstall.prompt();await deferredInstall.userChoice;deferredInstall=null;$('installCard').classList.remove('show');return}const isiOS=/iPad|iPhone|iPod/.test(navigator.userAgent);if(isiOS)alert('Na iPhone: stuknij Udostępnij w Safari → Dodaj do ekranu początkowego.');else alert('Otwórz menu przeglądarki i wybierz „Zainstaluj aplikację” lub „Dodaj do ekranu głównego”.')});if(/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.navigator.standalone)$('installCard')?.classList.add('show');if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
-applyInviteFromUrl();
 initCloud();
 
 $('todayLabel').textContent=new Intl.DateTimeFormat('pl-PL',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date());

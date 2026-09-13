@@ -101,6 +101,9 @@ button{cursor:pointer}
 .offline-pill{position:fixed;right:12px;bottom:calc(86px + env(safe-area-inset-bottom));z-index:45;background:#5c3511;border:1px solid #a56b27;color:#fff1d1;padding:8px 11px;border-radius:999px;font-size:11px;font-weight:900;display:none}.offline-pill.show{display:block}
 @media(max-width:700px){.attention-grid{grid-template-columns:1fr 1fr}.install-card{align-items:flex-start;flex-direction:column}.workshop-profile{grid-template-columns:1fr}}
 
+
+/* PRO 12.5 ROUTE HISTORY */
+.route-history-map{height:330px;border-radius:16px;overflow:hidden;border:1px solid #31516f;background:#08131f;margin-top:12px}.route-history-controls{display:grid;grid-template-columns:1fr 1fr;gap:10px}.route-history-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.route-history-stat{background:#0b1929;border:1px solid #2c4664;border-radius:14px;padding:10px}.route-history-stat b{display:block;font-size:19px}.route-history-stat span{color:var(--muted);font-size:10px}@media(max-width:700px){.route-history-controls{grid-template-columns:1fr}.route-history-map{height:300px}}
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
@@ -109,7 +112,7 @@ button{cursor:pointer}
 <body>
 <header class="topbar">
   <div class="top-inner">
-    <div class="brand"><div class="logo">🚚</div><div><small>AUTO BODY MANAGER</small><h1>PRO 12.4 AUTO TRACKING</h1></div></div>
+    <div class="brand"><div class="logo">🚚</div><div><small>AUTO BODY MANAGER</small><h1>PRO 12.5 ROUTE HISTORY</h1></div></div>
     <div class="top-actions"><div class="cloud-pill" id="cloudPill"><span class="cloud-dot" id="cloudDot"></span><span id="cloudText">Lokalnie</span></div><button class="icon-btn" id="accountTop" title="Konto">👤</button><button class="icon-btn" id="driverModeTop" title="Tryb kierowcy">🛣️</button><button class="icon-btn" id="quickAddTop" title="Nowe zlecenie">＋</button></div>
   </div>
 </header>
@@ -227,7 +230,7 @@ button{cursor:pointer}
 
     <section class="view" data-view="dispatch">
       <section class="panel">
-        <div class="panel-head"><div><div class="eyebrow">PRO 12.4 AUTO TRACKING</div><h3>Centrum Dyspozytora</h3></div><span class="live-badge"><span class="live-dot"></span>LIVE</span></div>
+        <div class="panel-head"><div><div class="eyebrow">PRO 12.5 ROUTE HISTORY</div><h3>Centrum Dyspozytora</h3></div><span class="live-badge"><span class="live-dot"></span>LIVE</span></div>
         <div class="report-grid">
           <div class="report-box"><b id="dispActive">0</b><span>Aktywne</span></div><div class="report-box"><b id="dispCollected">0</b><span>W aucie</span></div>
           <div class="report-box"><b id="dispDone">0</b><span>Dostarczone dziś</span></div><div class="report-box"><b id="dispUnassigned">0</b><span>Nieprzypisane</span></div>
@@ -326,6 +329,15 @@ button{cursor:pointer}
         <div class="panel-head"><div><div class="eyebrow">LIVE</div><h3>Lokalizacje kierowców</h3></div><span class="live-badge"><span class="live-dot"></span>NA ŻYWO</span></div>
         <div id="liveMap" class="live-map"><div class="empty" style="padding:24px">Mapa pojawi się po odebraniu lokalizacji kierowcy.</div></div>
         <div class="map-box" id="liveLocations"><div class="empty">Brak aktywnych lokalizacji.</div></div>
+      </section>
+      <section class="panel">
+        <div class="panel-head"><div><div class="eyebrow">PRO 12.5</div><h3>Historia trasy</h3></div><span class="live-badge">🛣️ GPS</span></div>
+        <div class="route-history-controls">
+          <label class="field">Kierowca<select id="routeHistoryDriver"></select></label>
+          <label class="field">Dzień<input id="routeHistoryDate" type="date"></label>
+        </div>
+        <div class="route-history-stats"><div class="route-history-stat"><b id="routeHistoryPoints">0</b><span>Punkty GPS</span></div><div class="route-history-stat"><b id="routeHistoryStart">—</b><span>Start</span></div><div class="route-history-stat"><b id="routeHistoryEnd">—</b><span>Ostatni punkt</span></div></div>
+        <div id="routeHistoryMap" class="route-history-map"><div class="empty" style="padding:24px">Wybierz kierowcę, aby zobaczyć przejazd.</div></div>
       </section>
       <section class="panel">
         <div class="panel-head"><div><div class="eyebrow">AKTYWNOŚĆ</div><h3>Kto co zrobił</h3></div></div>
@@ -498,7 +510,7 @@ const SUPABASE_KEY='sb_publishable_NGBeULF1jwaLLJNFccDBXg_fe7Lhe4g';
 const sb=(window.supabase&&window.supabase.createClient)?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
 let cloudUser=null, cloudWorkspace=null, cloudBusy=false;
 let activityLog=[];
-let currentMembership=null, liveChannel=null, geoWatchId=null, geoHeartbeatTimer=null, lastGpsSentAt=0, driverDayStarted=false;
+let currentMembership=null, liveChannel=null, geoWatchId=null, geoHeartbeatTimer=null, lastGpsSentAt=0, lastRoutePointAt=0, lastRouteLat=null, lastRouteLng=null, driverDayStarted=false;
 const STORAGE_KEY='autoBodyManagerV3';
 const META_KEY='autoBodyManagerProMeta';
 const PRO_KEY='autoBodyManagerPro2';
@@ -650,6 +662,23 @@ function renderDispatchLiveCards(rows,mm){
   if($('ccMoving'))$('ccMoving').textContent=counts.moving;if($('ccStopped'))$('ccStopped').textContent=counts.stop;if($('ccOffline'))$('ccOffline').textContent=counts.offline;
   box.innerHTML=rows.length?rows.map(x=>{const m=mm.get(x.user_id),name=m?.display_name||m?.email||'Kierowca',st=driverPresence(x),job=driverJob(x.user_id),hasPos=Number.isFinite(Number(x.lat))&&Number.isFinite(Number(x.lng)),t=x.updated_at?new Date(x.updated_at).toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'}):'—';return `<div class="dispatch-live-card ${st.key==='offline'?'offline':''}"><div class="dispatch-live-top"><div><h4>🚚 ${esc(name)}</h4><span class="driver-status ${st.key}">${st.label}</span></div><div class="muted">${t}</div></div><div class="jobline">${job?`<b>📦 ${esc(job.company)}</b><div class="muted">${esc(job.reg||job.address||'')} • ${job.status==='pending'?'Do odbioru':job.status==='collected'?'W aucie':'Dostarczone'}</div>`:'<b>Brak aktywnego zlecenia</b><div class="muted">Kierowca nie ma teraz otwartego punktu.</div>'}</div><div class="dispatch-live-actions">${hasPos?`<button class="act blue" onclick="window.open('https://www.google.com/maps?q=${x.lat},${x.lng}','_blank')">📍 Mapa</button>`:''}${job?`<button class="act" onclick="openOps('${job.id}')">📋 Zlecenie</button>`:''}</div></div>`}).join(''):'<div class="empty">Brak kierowców w zespole.</div>';
 }
+let routeHistoryMapInstance=null,routeHistoryLayer=null;
+function routeDistanceMeters(points){let d=0;const R=6371000,rad=x=>x*Math.PI/180;for(let i=1;i<points.length;i++){const a=points[i-1],b=points[i],dLat=rad(b.lat-a.lat),dLng=rad(b.lng-a.lng),q=Math.sin(dLat/2)**2+Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(dLng/2)**2;d+=2*R*Math.asin(Math.sqrt(q))}return d}
+async function renderRouteHistory(){
+  if(!sb||!cloudWorkspace||!$('routeHistoryMap'))return;
+  const sel=$('routeHistoryDriver'),date=$('routeHistoryDate'); if(!date.value)date.value=isoDate();
+  const members=await refreshMemberships(),drivers=members.filter(m=>m.role==='driver');
+  const old=sel.value; sel.innerHTML=drivers.map(m=>`<option value="${esc(m.user_id)}">${esc(m.display_name||m.email||'Kierowca')}</option>`).join(''); if(old&&drivers.some(m=>m.user_id===old))sel.value=old; if(!sel.value&&drivers[0])sel.value=drivers[0].user_id;
+  if(!sel.value)return;
+  const start=new Date(date.value+'T00:00:00'),end=new Date(date.value+'T23:59:59.999');
+  const {data,error}=await sb.from('driver_route_points').select('lat,lng,accuracy,recorded_at').eq('workspace_id',cloudWorkspace.id).eq('user_id',sel.value).gte('recorded_at',start.toISOString()).lte('recorded_at',end.toISOString()).order('recorded_at',{ascending:true}).limit(3000);
+  if(error){console.warn('Route history:',error.message);return}
+  const pts=(data||[]).map(x=>({...x,lat:Number(x.lat),lng:Number(x.lng)})).filter(x=>Number.isFinite(x.lat)&&Number.isFinite(x.lng));
+  $('routeHistoryPoints').textContent=pts.length;$('routeHistoryStart').textContent=pts[0]?new Date(pts[0].recorded_at).toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'}):'—';$('routeHistoryEnd').textContent=pts.at(-1)?new Date(pts.at(-1).recorded_at).toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'}):'—';
+  const el=$('routeHistoryMap'); if(!pts.length){if(routeHistoryMapInstance){routeHistoryMapInstance.remove();routeHistoryMapInstance=null;routeHistoryLayer=null}el.innerHTML='<div class="empty" style="padding:24px">Brak zapisanej trasy dla tego dnia.</div>';return} if(!window.L)return;
+  if(!routeHistoryMapInstance){el.innerHTML='';routeHistoryMapInstance=L.map(el,{zoomControl:true});L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(routeHistoryMapInstance);routeHistoryLayer=L.layerGroup().addTo(routeHistoryMapInstance)}
+  routeHistoryLayer.clearLayers();const latlngs=pts.map(x=>[x.lat,x.lng]);L.polyline(latlngs,{weight:5,opacity:.85}).addTo(routeHistoryLayer);L.circleMarker(latlngs[0],{radius:7}).addTo(routeHistoryLayer).bindPopup('▶ Start '+new Date(pts[0].recorded_at).toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'}));L.circleMarker(latlngs.at(-1),{radius:7}).addTo(routeHistoryLayer).bindPopup('■ Ostatni punkt '+new Date(pts.at(-1).recorded_at).toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'}));routeHistoryMapInstance.fitBounds(latlngs,{padding:[30,30],maxZoom:17});setTimeout(()=>routeHistoryMapInstance&&routeHistoryMapInstance.invalidateSize(),80)
+}
 async function renderLiveLocations(){
   if(!sb||!cloudWorkspace||!$('liveLocations'))return;
   const {data}=await sb.from('driver_locations').select('user_id,lat,lng,accuracy,updated_at').eq('workspace_id',cloudWorkspace.id).order('updated_at',{ascending:false});
@@ -685,6 +714,7 @@ async function startRealtime(){
   liveChannel=sb.channel('abm-live-'+cloudWorkspace.id)
     .on('postgres_changes',{event:'*',schema:'public',table:'jobs',filter:`workspace_id=eq.${cloudWorkspace.id}`},async()=>{await pullCloud(false);renderDriverLive()})
     .on('postgres_changes',{event:'*',schema:'public',table:'driver_locations',filter:`workspace_id=eq.${cloudWorkspace.id}`},()=>renderLiveLocations())
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'driver_route_points',filter:`workspace_id=eq.${cloudWorkspace.id}`},()=>{if(document.querySelector('[data-view="team"]')?.classList.contains('active'))renderRouteHistory()})
     .on('postgres_changes',{event:'*',schema:'public',table:'workspace_members',filter:`workspace_id=eq.${cloudWorkspace.id}`},()=>renderCloudTeam())
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'team_activity',filter:`workspace_id=eq.${cloudWorkspace.id}`},()=>renderCloudTeam())
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'job_events',filter:`workspace_id=eq.${cloudWorkspace.id}`},()=>{const id=$('opsJobId')?.value;if(id)loadJobTimeline(id)})
@@ -699,6 +729,8 @@ async function sendDriverPosition(pos){
   const row={workspace_id:cloudWorkspace.id,user_id:cloudUser.id,lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:pos.coords.accuracy,updated_at:new Date().toISOString()};
   const {error}=await sb.from('driver_locations').upsert(row,{onConflict:'workspace_id,user_id'});
   if(!error){
+    const moved=lastRouteLat===null?999999:(()=>{const R=6371000,rad=x=>x*Math.PI/180,dLat=rad(pos.coords.latitude-lastRouteLat),dLng=rad(pos.coords.longitude-lastRouteLng),q=Math.sin(dLat/2)**2+Math.cos(rad(lastRouteLat))*Math.cos(rad(pos.coords.latitude))*Math.sin(dLng/2)**2;return 2*R*Math.asin(Math.sqrt(q))})();
+    if(driverDayStarted&&(now-lastRoutePointAt>=30000||moved>=25)){const rp={workspace_id:cloudWorkspace.id,user_id:cloudUser.id,lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:pos.coords.accuracy,recorded_at:new Date().toISOString()};const rr=await sb.from('driver_route_points').insert(rp);if(!rr.error){lastRoutePointAt=now;lastRouteLat=pos.coords.latitude;lastRouteLng=pos.coords.longitude}}
     setCloudStatus('on','LIVE GPS');
     updateTrackingUI(true);
     return true;
@@ -862,7 +894,7 @@ async function pullCloud(skipRender=false){
   }catch(err){console.warn('Pull:',err.message)}
 }
 
-function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.dataset.view===v));document.querySelectorAll('.nav-btn').forEach(x=>x.classList.toggle('active',x.dataset.nav===v));const names={dashboard:['CENTRUM DOWODZENIA','Dzień kierowcy'],route:['PLAN DNIA','Trasa'],orders:['BAZA','Zlecenia'],workshops:['KONTAKTY','Warsztaty'],history:['ARCHIWUM','Historia'],settings:['SYSTEM','Ustawienia'],cloud:['CHMURA','Konto i synchronizacja'],team:['ZESPÓŁ','Zespół i przydziały'],driverlive:['DRIVER LIVE','Moja trasa'],inventory:['MAGAZYN','Części'],customers:['KLIENCI','Klienci i auta'],expenses:['KOSZTY','Wydatki'],dispatch:['DYSPOZYTORNIA','Centrum operacyjne'],reports:['RAPORTY','Podsumowanie'],more:['AUTO BODY MANAGER PRO','Więcej']};$('viewEyebrow').textContent=names[v]?.[0]||'AUTO BODY MANAGER';$('viewTitle').textContent=names[v]?.[1]||'PRO 12.4 AUTO TRACKING';if(v==='team')setTimeout(()=>{renderLiveLocations();if(liveMapInstance)liveMapInstance.invalidateSize()},120);if(v==='dispatch')setTimeout(()=>{renderDispatch();renderLiveLocations();if(dispatchMapInstance)dispatchMapInstance.invalidateSize()},120);window.scrollTo({top:0,behavior:'smooth'})}
+function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.dataset.view===v));document.querySelectorAll('.nav-btn').forEach(x=>x.classList.toggle('active',x.dataset.nav===v));const names={dashboard:['CENTRUM DOWODZENIA','Dzień kierowcy'],route:['PLAN DNIA','Trasa'],orders:['BAZA','Zlecenia'],workshops:['KONTAKTY','Warsztaty'],history:['ARCHIWUM','Historia'],settings:['SYSTEM','Ustawienia'],cloud:['CHMURA','Konto i synchronizacja'],team:['ZESPÓŁ','Zespół i przydziały'],driverlive:['DRIVER LIVE','Moja trasa'],inventory:['MAGAZYN','Części'],customers:['KLIENCI','Klienci i auta'],expenses:['KOSZTY','Wydatki'],dispatch:['DYSPOZYTORNIA','Centrum operacyjne'],reports:['RAPORTY','Podsumowanie'],more:['AUTO BODY MANAGER PRO','Więcej']};$('viewEyebrow').textContent=names[v]?.[0]||'AUTO BODY MANAGER';$('viewTitle').textContent=names[v]?.[1]||'PRO 12.5 ROUTE HISTORY';if(v==='team')setTimeout(()=>{renderLiveLocations();renderRouteHistory();if(liveMapInstance)liveMapInstance.invalidateSize()},120);if(v==='dispatch')setTimeout(()=>{renderDispatch();renderLiveLocations();if(dispatchMapInstance)dispatchMapInstance.invalidateSize()},120);window.scrollTo({top:0,behavior:'smooth'})}
 function openModal(id){$(id).classList.add('open')}function closeModal(id){$(id).classList.remove('open')}
 function clearSignatureCanvas(){const c=$('signatureCanvas');const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);signatureChanged=false}
 function resetOrder(date=isoDate()){ $('orderForm').reset();$('editId').value='';$('pickupDate').value=date;$('status').value='pending';$('orderModalTitle').textContent='Nowy odbiór';pendingPhotos=[];renderPhotoPreview();clearSignatureCanvas()}
@@ -928,6 +960,7 @@ function sigEnd(){drawing=false}
 
 
 bindDrawCanvas('pickupSignatureCanvas');bindDrawCanvas('deliverySignatureCanvas');$('clearPickupSignature').addEventListener('click',()=>setOpsCanvas('pickupSignatureCanvas',''));$('clearDeliverySignature').addEventListener('click',()=>setOpsCanvas('deliverySignatureCanvas',''));$('pickupPhotosInput').addEventListener('change',async e=>{opsPickupPhotos=[];for(const f of [...e.target.files].slice(0,3))opsPickupPhotos.push(await resizeImage(f,900,.72));$('pickupPhotosPreview').innerHTML=opsPickupPhotos.map(x=>`<img src="${x}">`).join('')});$('deliveryPhotosInput').addEventListener('change',async e=>{opsDeliveryPhotos=[];for(const f of [...e.target.files].slice(0,3))opsDeliveryPhotos.push(await resizeImage(f,900,.72));$('deliveryPhotosPreview').innerHTML=opsDeliveryPhotos.map(x=>`<img src="${x}">`).join('')});$('savePickupEvidence').addEventListener('click',async()=>{const p=pickups.find(x=>String(x.id)===String($('opsJobId').value));if(!p)return;const raw=[...opsPickupPhotos];p.pickupPhotos=[];for(let i=0;i<raw.length;i++)p.pickupPhotos.push(await uploadEvidence(raw[i],p,'pickup-photo',i));if(opsCanvasHasInk('pickupSignatureCanvas'))p.pickupSignature=await uploadEvidence($('pickupSignatureCanvas').toDataURL('image/png'),p,'pickup-signature',0);if(!p.collectedAt&&p.status==='pending'){p.status='collected';p.collectedAt=Date.now()}p.pickedUpBy=cloudUser?.id||'';p.pickedUpByName=currentMembership?.display_name||p.assignedName||meta.driverName||'Kierowca';save();await addJobEvent(p,'pickup_evidence',`Zapisano potwierdzenie odbioru — ${p.company}`,{photos:p.pickupPhotos.length,signature:!!p.pickupSignature});if(cloudUser&&cloudWorkspace)await syncCloud(true);refreshOpsEvidenceStates(p);render();toast('Potwierdzenie odbioru zapisane');await openOps(p.id)});$('saveDeliveryEvidence').addEventListener('click',async()=>{const p=pickups.find(x=>String(x.id)===String($('opsJobId').value));if(!p)return;const raw=[...opsDeliveryPhotos];p.deliveryPhotos=[];for(let i=0;i<raw.length;i++)p.deliveryPhotos.push(await uploadEvidence(raw[i],p,'delivery-photo',i));if(opsCanvasHasInk('deliverySignatureCanvas'))p.deliverySignature=await uploadEvidence($('deliverySignatureCanvas').toDataURL('image/png'),p,'delivery-signature',0);p.deliveredBy=cloudUser?.id||'';p.deliveredByName=currentMembership?.display_name||p.assignedName||meta.driverName||'Kierowca';save();await addJobEvent(p,'delivery_evidence',`Zapisano potwierdzenie dostawy — ${p.company}`,{photos:p.deliveryPhotos.length,signature:!!p.deliverySignature});if(cloudUser&&cloudWorkspace)await syncCloud(true);refreshOpsEvidenceStates(p);render();toast('Potwierdzenie dostawy zapisane');await openOps(p.id)});$('printProofBtn').addEventListener('click',()=>{const id=$('opsJobId').value;if(id)printProof(id)});$('transferJobBtn').addEventListener('click',async()=>{const p=pickups.find(x=>String(x.id)===String($('opsJobId').value)),newId=$('transferDriver').value;if(!p||!newId)return alert('Wybierz kierowcę.');const m=teamMembers().find(x=>x.id===newId);if(!m)return;const oldName=p.assignedName||'Nieprzypisane',oldId=p.assignedTo||'';if(oldId===newId)return toast('To zlecenie jest już przypisane do tej osoby');p.transferredFrom=oldId;p.transferredFromName=oldName;p.transferredAt=Date.now();p.assignedTo=m.id;p.assignedName=m.name;save();await addJobEvent(p,'transfer',`Przekazano zlecenie: ${oldName} → ${m.name}`,{from:oldId,to:newId});if(cloudUser&&cloudWorkspace)await syncCloud(true);render();toast('Zlecenie przekazane');await openOps(p.id)});
+$('routeHistoryDriver')?.addEventListener('change',renderRouteHistory);$('routeHistoryDate')?.addEventListener('change',renderRouteHistory);
 $('startDayBtn').addEventListener('click',async()=>{driverDayStarted=true;localStorage.setItem('abmDriverDay','1');const now=Date.now();myJobs().forEach(p=>{if(!p.startedAt)p.startedAt=now});save();renderDriverLive();await pushActivity('Rozpoczął trasę');if(isDriver()){await syncCloud(true);startLocation();refreshGpsOnce()}});
 $('stopDayBtn').addEventListener('click',async()=>{driverDayStarted=false;localStorage.removeItem('abmDriverDay');stopLocation();renderDriverLive();await pushActivity('Zakończył dzień');toast('Dzień zakończony')});
 $('shareLocationBtn').addEventListener('click',()=>{if(geoWatchId!==null){stopLocation();toast('AUTO GPS wyłączony')}else startLocation()});

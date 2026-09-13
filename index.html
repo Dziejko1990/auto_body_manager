@@ -315,8 +315,9 @@ button{cursor:pointer}
         <div class="invite-box owner-only" style="margin-top:14px">
           <div class="eyebrow">KOD ZESPOŁU</div>
           <div class="invite-code" id="inviteCode">--------</div>
-          <div class="muted">Nowy kierowca zakłada konto i wpisuje ten kod, aby dołączyć do Twojej firmy.</div>
-          <div class="actions"><button class="act" id="copyInviteBtn">📋 Kopiuj kod</button></div>
+          <div class="muted">Nowy kierowca może wpisać kod albo otworzyć gotowy link zaproszenia.</div>
+          <div class="actions"><button class="act" id="copyInviteBtn">📋 Kopiuj kod</button><button class="primary" id="shareDriverInviteBtn">📲 Zaproś kierowcę</button><button class="act" id="showInviteQrBtn">▦ Kod QR</button></div>
+          <div id="inviteQrBox" style="display:none;margin-top:12px;text-align:center"><img id="inviteQrImg" alt="Kod QR zaproszenia" style="width:220px;max-width:100%;border-radius:16px;background:#fff;padding:10px"><div class="muted" style="margin-top:8px">Kierowca skanuje kod aparatem telefonu.</div></div>
         </div>
       </section>
       <section class="panel">
@@ -670,6 +671,7 @@ function updateAuthUI(){
   $('signedOutBox').style.display=cloudUser?'none':'block';
   $('signedInBox').style.display=cloudUser?'block':'none';
   $('cloudUserEmail').textContent=cloudUser?.email||'—';
+  const pendingInvite=new URLSearchParams(location.search).get('join')||sessionStorage.getItem('abmPendingInvite')||'';if(pendingInvite&&$('joinCode'))$('joinCode').value=pendingInvite;
   $('workspaceName').textContent=(cloudWorkspace?.name||'Auto Body Manager')+(currentMembership?.role?` • ${currentMembership.role.toUpperCase()}`:'');
   setCloudStatus(cloudUser?'on':'off',cloudUser?'Chmura':'Lokalnie');
 }
@@ -851,7 +853,12 @@ bindDrawCanvas('pickupSignatureCanvas');bindDrawCanvas('deliverySignatureCanvas'
 $('startDayBtn').addEventListener('click',async()=>{driverDayStarted=true;localStorage.setItem('abmDriverDay','1');const now=Date.now();myJobs().forEach(p=>{if(!p.startedAt)p.startedAt=now});save();renderDriverLive();await pushActivity('Rozpoczął trasę');if(isDriver()){await syncCloud(true);startLocation()}});
 $('stopDayBtn').addEventListener('click',async()=>{driverDayStarted=false;localStorage.removeItem('abmDriverDay');stopLocation();renderDriverLive();await pushActivity('Zakończył dzień');toast('Dzień zakończony')});
 $('shareLocationBtn').addEventListener('click',()=>startLocation());
+function driverInviteUrl(){const c=cloudWorkspace?.invite_code||'';return c?`${location.origin}${location.pathname}?join=${encodeURIComponent(c)}`:''}
+function applyInviteFromUrl(){const code=new URLSearchParams(location.search).get('join');if(!code)return;sessionStorage.setItem('abmPendingInvite',code);if($('joinCode'))$('joinCode').value=code;showView('cloud');toast('Zaproszenie kierowcy gotowe — zaloguj się lub utwórz konto')}
+async function shareDriverInvite(){const url=driverInviteUrl(),code=cloudWorkspace?.invite_code||'';if(!url)return alert('Najpierw zaloguj się jako właściciel.');const text=`Dołącz do mojego zespołu w Auto Body Manager jako kierowca. Kod: ${code}`;try{if(navigator.share)await navigator.share({title:'Auto Body Manager — zaproszenie kierowcy',text,url});else{await navigator.clipboard.writeText(url);toast('Link zaproszenia skopiowany')}}catch(_){}}
 $('copyInviteBtn').addEventListener('click',async()=>{const c=cloudWorkspace?.invite_code||'';if(!c)return;await navigator.clipboard.writeText(c);toast('Kod zespołu skopiowany')});
+$('shareDriverInviteBtn')?.addEventListener('click',shareDriverInvite);
+$('showInviteQrBtn')?.addEventListener('click',()=>{const url=driverInviteUrl();if(!url)return alert('Najpierw zaloguj się jako właściciel.');const box=$('inviteQrBox'),img=$('inviteQrImg');img.src='https://api.qrserver.com/v1/create-qr-code/?size=440x440&data='+encodeURIComponent(url);box.style.display=box.style.display==='none'?'block':'none'});
 $('joinTeamBtn').addEventListener('click',async()=>{
   if(!sb||!cloudUser)return alert('Najpierw zaloguj się.');
   const code=$('joinCode').value.trim(),phone=$('joinPhone').value.trim();
@@ -862,7 +869,7 @@ $('joinTeamBtn').addEventListener('click',async()=>{
   const {data:joined,error:joinedError}=await sb.from('workspace_members').select('workspace_id,role,display_name,email,phone,workspaces(id,name,owner_id,invite_code)').eq('workspace_id',joinedId).eq('user_id',cloudUser.id).single();
   if(joinedError)return alert('Dołączono, ale nie udało się otworzyć zespołu: '+joinedError.message);
   currentMembership=joined;cloudWorkspace=joined.workspaces;
-  $('joinCode').value='';
+  $('joinCode').value='';sessionStorage.removeItem('abmPendingInvite');history.replaceState({},'',location.pathname);
   await pullCloud(false);await renderCloudTeam();await startRealtime();applyRoleMode();updateAuthUI();render();toast('Dołączono jako kierowca');
 });
 driverDayStarted=localStorage.getItem('abmDriverDay')==='1';
@@ -901,6 +908,7 @@ $('syncNowBtn').addEventListener('click',()=>syncCloud(false));
 const savedSync=localStorage.getItem('autoBodyManagerLastSync');
 if(savedSync&&$('lastSyncText'))$('lastSyncText').textContent='Ostatnia synchronizacja: '+new Date(savedSync).toLocaleString('pl-PL');
 let deferredInstall=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;$('installCard')?.classList.add('show');$('installText').textContent='Android: zainstaluj aplikację jednym przyciskiem.'});function updateOnline(){const off=!navigator.onLine;$('offlinePill')?.classList.toggle('show',off)}window.addEventListener('online',updateOnline);window.addEventListener('offline',updateOnline);updateOnline();$('installBtn')?.addEventListener('click',async()=>{if(deferredInstall){deferredInstall.prompt();await deferredInstall.userChoice;deferredInstall=null;$('installCard').classList.remove('show');return}const isiOS=/iPad|iPhone|iPod/.test(navigator.userAgent);if(isiOS)alert('Na iPhone: stuknij Udostępnij w Safari → Dodaj do ekranu początkowego.');else alert('Otwórz menu przeglądarki i wybierz „Zainstaluj aplikację” lub „Dodaj do ekranu głównego”.')});if(/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.navigator.standalone)$('installCard')?.classList.add('show');if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+applyInviteFromUrl();
 initCloud();
 
 $('todayLabel').textContent=new Intl.DateTimeFormat('pl-PL',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date());

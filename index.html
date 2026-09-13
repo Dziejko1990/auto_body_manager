@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#07101d">
-<title>Auto Body Manager PRO 5.0 DRIVER LIVE</title>
+<title>Auto Body Manager PRO 5.1 TEAM JOIN</title>
 <style>
 :root{
   --bg:#07101d; --bg2:#0b1524; --panel:#111f32; --panel2:#172941;
@@ -91,7 +91,7 @@ button{cursor:pointer}
 <body>
 <header class="topbar">
   <div class="top-inner">
-    <div class="brand"><div class="logo">🚚</div><div><small>AUTO BODY MANAGER</small><h1>PRO 5.0 LIVE</h1></div></div>
+    <div class="brand"><div class="logo">🚚</div><div><small>AUTO BODY MANAGER</small><h1>PRO 5.1 LIVE</h1></div></div>
     <div class="top-actions"><div class="cloud-pill" id="cloudPill"><span class="cloud-dot" id="cloudDot"></span><span id="cloudText">Lokalnie</span></div><button class="icon-btn" id="accountTop" title="Konto">👤</button><button class="icon-btn" id="driverModeTop" title="Tryb kierowcy">🛣️</button><button class="icon-btn" id="quickAddTop" title="Nowe zlecenie">＋</button></div>
   </div>
 </header>
@@ -315,7 +315,7 @@ button{cursor:pointer}
           </div>
         </div>
 
-        <div class="sync-panel driver-only" style="margin-bottom:14px">
+        <div class="sync-panel" id="joinTeamPanel" style="margin-bottom:14px">
           <div><b>Dołącz do firmy jako kierowca</b><div class="muted">Wpisz kod otrzymany od właściciela.</div></div>
           <div class="auth-grid" style="margin-top:10px">
             <label class="field">Kod zespołu<input id="joinCode" maxlength="8" placeholder="AB12CD34"></label>
@@ -645,11 +645,12 @@ async function initCloud(){
 async function loadWorkspace(){
   if(!cloudUser||!sb)return null;
   try{
-    let mem=await sb.from('workspace_members').select('workspace_id,role,display_name,email,phone,workspaces(id,name,owner_id,invite_code)').eq('user_id',cloudUser.id).limit(1).maybeSingle();
+    let mem=await sb.from('workspace_members').select('workspace_id,role,display_name,email,phone,workspaces(id,name,owner_id,invite_code)').eq('user_id',cloudUser.id);
     if(mem.error)throw mem.error;
-    if(mem.data){
-      currentMembership=mem.data;
-      cloudWorkspace=mem.data.workspaces;
+    if(mem.data&&mem.data.length){
+      const preferred=mem.data.find(x=>x.role==='driver')||mem.data.find(x=>x.role==='admin')||mem.data.find(x=>x.role==='owner')||mem.data[0];
+      currentMembership=preferred;
+      cloudWorkspace=preferred.workspaces;
       applyRoleMode();
       return cloudWorkspace;
     }
@@ -734,7 +735,7 @@ async function pullCloud(skipRender=false){
   }catch(err){console.warn('Pull:',err.message)}
 }
 
-function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.dataset.view===v));document.querySelectorAll('.nav-btn').forEach(x=>x.classList.toggle('active',x.dataset.nav===v));const names={dashboard:['CENTRUM DOWODZENIA','Dzień kierowcy'],route:['PLAN DNIA','Trasa'],orders:['BAZA','Zlecenia'],workshops:['KONTAKTY','Warsztaty'],history:['ARCHIWUM','Historia'],settings:['SYSTEM','Ustawienia'],cloud:['CHMURA','Konto i synchronizacja'],team:['ZESPÓŁ','Zespół i przydziały'],driverlive:['DRIVER LIVE','Moja trasa'],inventory:['MAGAZYN','Części'],customers:['KLIENCI','Klienci i auta'],expenses:['KOSZTY','Wydatki'],reports:['RAPORTY','Podsumowanie'],more:['AUTO BODY MANAGER PRO','Więcej']};$('viewEyebrow').textContent=names[v]?.[0]||'AUTO BODY MANAGER';$('viewTitle').textContent=names[v]?.[1]||'PRO 5.0 LIVE';window.scrollTo({top:0,behavior:'smooth'})}
+function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.dataset.view===v));document.querySelectorAll('.nav-btn').forEach(x=>x.classList.toggle('active',x.dataset.nav===v));const names={dashboard:['CENTRUM DOWODZENIA','Dzień kierowcy'],route:['PLAN DNIA','Trasa'],orders:['BAZA','Zlecenia'],workshops:['KONTAKTY','Warsztaty'],history:['ARCHIWUM','Historia'],settings:['SYSTEM','Ustawienia'],cloud:['CHMURA','Konto i synchronizacja'],team:['ZESPÓŁ','Zespół i przydziały'],driverlive:['DRIVER LIVE','Moja trasa'],inventory:['MAGAZYN','Części'],customers:['KLIENCI','Klienci i auta'],expenses:['KOSZTY','Wydatki'],reports:['RAPORTY','Podsumowanie'],more:['AUTO BODY MANAGER PRO','Więcej']};$('viewEyebrow').textContent=names[v]?.[0]||'AUTO BODY MANAGER';$('viewTitle').textContent=names[v]?.[1]||'PRO 5.1 LIVE';window.scrollTo({top:0,behavior:'smooth'})}
 function openModal(id){$(id).classList.add('open')}function closeModal(id){$(id).classList.remove('open')}
 function clearSignatureCanvas(){const c=$('signatureCanvas');const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);signatureChanged=false}
 function resetOrder(date=isoDate()){ $('orderForm').reset();$('editId').value='';$('pickupDate').value=date;$('status').value='pending';$('orderModalTitle').textContent='Nowy odbiór';pendingPhotos=[];renderPhotoPreview();clearSignatureCanvas()}
@@ -807,7 +808,12 @@ $('joinTeamBtn').addEventListener('click',async()=>{
   if(!code)return alert('Wpisz kod zespołu.');
   const {data,error}=await sb.rpc('join_workspace_by_code',{code,member_name:meta.driverName||cloudUser.email?.split('@')[0]||'Kierowca',member_phone:phone});
   if(error)return alert('Nie udało się dołączyć: '+error.message);
-  await loadWorkspace();await pullCloud(false);await startRealtime();applyRoleMode();render();toast('Dołączono do zespołu');
+  const joinedId=data;
+  const {data:joined,error:joinedError}=await sb.from('workspace_members').select('workspace_id,role,display_name,email,phone,workspaces(id,name,owner_id,invite_code)').eq('workspace_id',joinedId).eq('user_id',cloudUser.id).single();
+  if(joinedError)return alert('Dołączono, ale nie udało się otworzyć zespołu: '+joinedError.message);
+  currentMembership=joined;cloudWorkspace=joined.workspaces;
+  $('joinCode').value='';
+  await pullCloud(false);await renderCloudTeam();await startRealtime();applyRoleMode();updateAuthUI();render();toast('Dołączono jako kierowca');
 });
 driverDayStarted=localStorage.getItem('abmDriverDay')==='1';
 

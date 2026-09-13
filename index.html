@@ -109,7 +109,7 @@ button{cursor:pointer}
 <body>
 <header class="topbar">
   <div class="top-inner">
-    <div class="brand"><div class="logo">🚚</div><div><small>AUTO BODY MANAGER</small><h1>PRO 12.3 CONTROL CENTER</h1></div></div>
+    <div class="brand"><div class="logo">🚚</div><div><small>AUTO BODY MANAGER</small><h1>PRO 12.4 AUTO TRACKING</h1></div></div>
     <div class="top-actions"><div class="cloud-pill" id="cloudPill"><span class="cloud-dot" id="cloudDot"></span><span id="cloudText">Lokalnie</span></div><button class="icon-btn" id="accountTop" title="Konto">👤</button><button class="icon-btn" id="driverModeTop" title="Tryb kierowcy">🛣️</button><button class="icon-btn" id="quickAddTop" title="Nowe zlecenie">＋</button></div>
   </div>
 </header>
@@ -227,7 +227,7 @@ button{cursor:pointer}
 
     <section class="view" data-view="dispatch">
       <section class="panel">
-        <div class="panel-head"><div><div class="eyebrow">PRO 12.3 CONTROL CENTER</div><h3>Centrum Dyspozytora</h3></div><span class="live-badge"><span class="live-dot"></span>LIVE</span></div>
+        <div class="panel-head"><div><div class="eyebrow">PRO 12.4 AUTO TRACKING</div><h3>Centrum Dyspozytora</h3></div><span class="live-badge"><span class="live-dot"></span>LIVE</span></div>
         <div class="report-grid">
           <div class="report-box"><b id="dispActive">0</b><span>Aktywne</span></div><div class="report-box"><b id="dispCollected">0</b><span>W aucie</span></div>
           <div class="report-box"><b id="dispDone">0</b><span>Dostarczone dziś</span></div><div class="report-box"><b id="dispUnassigned">0</b><span>Nieprzypisane</span></div>
@@ -291,8 +291,9 @@ button{cursor:pointer}
           <div class="actions" style="margin-top:14px">
             <button class="primary" id="startDayBtn">▶ Rozpocznij trasę</button>
             <button class="secondary" id="stopDayBtn">■ Zakończ dzień</button>
-            <button class="secondary" id="shareLocationBtn">📍 Udostępnij lokalizację</button>
+            <button class="secondary" id="shareLocationBtn">📍 Włącz AUTO GPS</button>
           </div>
+          <div class="muted" id="trackingStatus" style="margin-top:10px">AUTO GPS wyłączony</div>
         </div>
         <div class="team-kpis" style="margin-top:14px">
           <div class="team-kpi"><b id="myJobsCount">0</b><span>Moje zlecenia</span></div>
@@ -497,7 +498,7 @@ const SUPABASE_KEY='sb_publishable_NGBeULF1jwaLLJNFccDBXg_fe7Lhe4g';
 const sb=(window.supabase&&window.supabase.createClient)?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
 let cloudUser=null, cloudWorkspace=null, cloudBusy=false;
 let activityLog=[];
-let currentMembership=null, liveChannel=null, geoWatchId=null, driverDayStarted=false;
+let currentMembership=null, liveChannel=null, geoWatchId=null, geoHeartbeatTimer=null, lastGpsSentAt=0, driverDayStarted=false;
 const STORAGE_KEY='autoBodyManagerV3';
 const META_KEY='autoBodyManagerProMeta';
 const PRO_KEY='autoBodyManagerPro2';
@@ -689,20 +690,54 @@ async function startRealtime(){
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'job_events',filter:`workspace_id=eq.${cloudWorkspace.id}`},()=>{const id=$('opsJobId')?.value;if(id)loadJobTimeline(id)})
     .subscribe();
 }
-async function startLocation(){
-  if(!navigator.geolocation)return alert('Ta przeglądarka nie udostępnia lokalizacji.');
-  if(!cloudUser||!cloudWorkspace)return alert('Najpierw zaloguj się do aplikacji.');
-  if(geoWatchId!==null)return toast('Lokalizacja jest już włączona');
-  geoWatchId=navigator.geolocation.watchPosition(async pos=>{
-    const row={workspace_id:cloudWorkspace.id,user_id:cloudUser.id,lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:pos.coords.accuracy,updated_at:new Date().toISOString()};
-    const {error}=await sb.from('driver_locations').upsert(row,{onConflict:'workspace_id,user_id'});
-    if(!error)setCloudStatus('on','LIVE GPS');
-  },err=>{alert('Nie udało się włączyć lokalizacji: '+err.message);geoWatchId=null},{enableHighAccuracy:true,maximumAge:15000,timeout:20000});
-  toast('Lokalizacja LIVE włączona');
+async function sendDriverPosition(pos){
+  if(!sb||!cloudUser||!cloudWorkspace||!pos)return false;
+  const now=Date.now();
+  // Avoid flooding the database when watchPosition fires many times per second.
+  if(now-lastGpsSentAt<12000)return true;
+  lastGpsSentAt=now;
+  const row={workspace_id:cloudWorkspace.id,user_id:cloudUser.id,lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:pos.coords.accuracy,updated_at:new Date().toISOString()};
+  const {error}=await sb.from('driver_locations').upsert(row,{onConflict:'workspace_id,user_id'});
+  if(!error){
+    setCloudStatus('on','LIVE GPS');
+    updateTrackingUI(true);
+    return true;
+  }
+  console.warn('GPS cloud:',error.message);
+  return false;
+}
+function updateTrackingUI(on=geoWatchId!==null){
+  const btn=$('shareLocationBtn'),st=$('trackingStatus');
+  if(btn)btn.textContent=on?'📍 AUTO GPS: Włączone':'📍 Włącz AUTO GPS';
+  if(st)st.textContent=on?'Pozycja aktualizuje się automatycznie podczas aktywnej trasy.':'AUTO GPS wyłączony';
+}
+async function refreshGpsOnce(){
+  if(!navigator.geolocation||!driverDayStarted||!cloudUser||!cloudWorkspace)return;
+  navigator.geolocation.getCurrentPosition(pos=>sendDriverPosition(pos),()=>{}, {enableHighAccuracy:true,maximumAge:10000,timeout:15000});
+}
+async function startLocation(silent=false){
+  if(!navigator.geolocation){if(!silent)alert('Ta przeglądarka nie udostępnia lokalizacji.');return}
+  if(!cloudUser||!cloudWorkspace){if(!silent)alert('Najpierw zaloguj się do aplikacji.');return}
+  if(geoWatchId!==null){updateTrackingUI(true);if(!silent)toast('AUTO GPS jest już włączony');return}
+  geoWatchId=navigator.geolocation.watchPosition(pos=>sendDriverPosition(pos),err=>{
+    console.warn('GPS:',err.message);
+    if(err.code===1){stopLocation();if(!silent)alert('Brak zgody na lokalizację. Włącz dostęp do lokalizacji dla Safari/Auto Body Manager.');}
+  },{enableHighAccuracy:true,maximumAge:10000,timeout:20000});
+  clearInterval(geoHeartbeatTimer);
+  geoHeartbeatTimer=setInterval(()=>{if(driverDayStarted&&document.visibilityState==='visible')refreshGpsOnce()},60000);
+  updateTrackingUI(true);
+  if(!silent)toast('AUTO GPS włączony');
 }
 function stopLocation(){
   if(geoWatchId!==null&&navigator.geolocation){navigator.geolocation.clearWatch(geoWatchId);geoWatchId=null}
+  if(geoHeartbeatTimer){clearInterval(geoHeartbeatTimer);geoHeartbeatTimer=null}
+  updateTrackingUI(false);
+  if(cloudUser)setCloudStatus('on','Chmura');
 }
+function resumeAutoTracking(){
+  if(driverDayStarted&&isDriver()&&cloudUser&&cloudWorkspace){startLocation(true);refreshGpsOnce()}
+}
+
 
 function setCloudStatus(mode,text){
   const dot=$('cloudDot'),tx=$('cloudText');
@@ -723,11 +758,11 @@ async function initCloud(){
   try{
     const {data}=await sb.auth.getSession();
     cloudUser=data.session?.user||null;
-    if(cloudUser){await loadWorkspace();await pullCloud(false);await renderCloudTeam();await renderLiveLocations();await startRealtime();renderDriverLive()}
+    if(cloudUser){await loadWorkspace();await pullCloud(false);await renderCloudTeam();await renderLiveLocations();await startRealtime();renderDriverLive();resumeAutoTracking()}
     updateAuthUI();
     sb.auth.onAuthStateChange(async(_event,session)=>{
       cloudUser=session?.user||null;
-      if(cloudUser){await loadWorkspace();await pullCloud(false);await renderCloudTeam();await renderLiveLocations();await startRealtime();renderDriverLive()}
+      if(cloudUser){await loadWorkspace();await pullCloud(false);await renderCloudTeam();await renderLiveLocations();await startRealtime();renderDriverLive();resumeAutoTracking()}
       else cloudWorkspace=null;
       updateAuthUI();
     });
@@ -827,7 +862,7 @@ async function pullCloud(skipRender=false){
   }catch(err){console.warn('Pull:',err.message)}
 }
 
-function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.dataset.view===v));document.querySelectorAll('.nav-btn').forEach(x=>x.classList.toggle('active',x.dataset.nav===v));const names={dashboard:['CENTRUM DOWODZENIA','Dzień kierowcy'],route:['PLAN DNIA','Trasa'],orders:['BAZA','Zlecenia'],workshops:['KONTAKTY','Warsztaty'],history:['ARCHIWUM','Historia'],settings:['SYSTEM','Ustawienia'],cloud:['CHMURA','Konto i synchronizacja'],team:['ZESPÓŁ','Zespół i przydziały'],driverlive:['DRIVER LIVE','Moja trasa'],inventory:['MAGAZYN','Części'],customers:['KLIENCI','Klienci i auta'],expenses:['KOSZTY','Wydatki'],dispatch:['DYSPOZYTORNIA','Centrum operacyjne'],reports:['RAPORTY','Podsumowanie'],more:['AUTO BODY MANAGER PRO','Więcej']};$('viewEyebrow').textContent=names[v]?.[0]||'AUTO BODY MANAGER';$('viewTitle').textContent=names[v]?.[1]||'PRO 12.3 CONTROL CENTER';if(v==='team')setTimeout(()=>{renderLiveLocations();if(liveMapInstance)liveMapInstance.invalidateSize()},120);if(v==='dispatch')setTimeout(()=>{renderDispatch();renderLiveLocations();if(dispatchMapInstance)dispatchMapInstance.invalidateSize()},120);window.scrollTo({top:0,behavior:'smooth'})}
+function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.dataset.view===v));document.querySelectorAll('.nav-btn').forEach(x=>x.classList.toggle('active',x.dataset.nav===v));const names={dashboard:['CENTRUM DOWODZENIA','Dzień kierowcy'],route:['PLAN DNIA','Trasa'],orders:['BAZA','Zlecenia'],workshops:['KONTAKTY','Warsztaty'],history:['ARCHIWUM','Historia'],settings:['SYSTEM','Ustawienia'],cloud:['CHMURA','Konto i synchronizacja'],team:['ZESPÓŁ','Zespół i przydziały'],driverlive:['DRIVER LIVE','Moja trasa'],inventory:['MAGAZYN','Części'],customers:['KLIENCI','Klienci i auta'],expenses:['KOSZTY','Wydatki'],dispatch:['DYSPOZYTORNIA','Centrum operacyjne'],reports:['RAPORTY','Podsumowanie'],more:['AUTO BODY MANAGER PRO','Więcej']};$('viewEyebrow').textContent=names[v]?.[0]||'AUTO BODY MANAGER';$('viewTitle').textContent=names[v]?.[1]||'PRO 12.4 AUTO TRACKING';if(v==='team')setTimeout(()=>{renderLiveLocations();if(liveMapInstance)liveMapInstance.invalidateSize()},120);if(v==='dispatch')setTimeout(()=>{renderDispatch();renderLiveLocations();if(dispatchMapInstance)dispatchMapInstance.invalidateSize()},120);window.scrollTo({top:0,behavior:'smooth'})}
 function openModal(id){$(id).classList.add('open')}function closeModal(id){$(id).classList.remove('open')}
 function clearSignatureCanvas(){const c=$('signatureCanvas');const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);signatureChanged=false}
 function resetOrder(date=isoDate()){ $('orderForm').reset();$('editId').value='';$('pickupDate').value=date;$('status').value='pending';$('orderModalTitle').textContent='Nowy odbiór';pendingPhotos=[];renderPhotoPreview();clearSignatureCanvas()}
@@ -893,9 +928,11 @@ function sigEnd(){drawing=false}
 
 
 bindDrawCanvas('pickupSignatureCanvas');bindDrawCanvas('deliverySignatureCanvas');$('clearPickupSignature').addEventListener('click',()=>setOpsCanvas('pickupSignatureCanvas',''));$('clearDeliverySignature').addEventListener('click',()=>setOpsCanvas('deliverySignatureCanvas',''));$('pickupPhotosInput').addEventListener('change',async e=>{opsPickupPhotos=[];for(const f of [...e.target.files].slice(0,3))opsPickupPhotos.push(await resizeImage(f,900,.72));$('pickupPhotosPreview').innerHTML=opsPickupPhotos.map(x=>`<img src="${x}">`).join('')});$('deliveryPhotosInput').addEventListener('change',async e=>{opsDeliveryPhotos=[];for(const f of [...e.target.files].slice(0,3))opsDeliveryPhotos.push(await resizeImage(f,900,.72));$('deliveryPhotosPreview').innerHTML=opsDeliveryPhotos.map(x=>`<img src="${x}">`).join('')});$('savePickupEvidence').addEventListener('click',async()=>{const p=pickups.find(x=>String(x.id)===String($('opsJobId').value));if(!p)return;const raw=[...opsPickupPhotos];p.pickupPhotos=[];for(let i=0;i<raw.length;i++)p.pickupPhotos.push(await uploadEvidence(raw[i],p,'pickup-photo',i));if(opsCanvasHasInk('pickupSignatureCanvas'))p.pickupSignature=await uploadEvidence($('pickupSignatureCanvas').toDataURL('image/png'),p,'pickup-signature',0);if(!p.collectedAt&&p.status==='pending'){p.status='collected';p.collectedAt=Date.now()}p.pickedUpBy=cloudUser?.id||'';p.pickedUpByName=currentMembership?.display_name||p.assignedName||meta.driverName||'Kierowca';save();await addJobEvent(p,'pickup_evidence',`Zapisano potwierdzenie odbioru — ${p.company}`,{photos:p.pickupPhotos.length,signature:!!p.pickupSignature});if(cloudUser&&cloudWorkspace)await syncCloud(true);refreshOpsEvidenceStates(p);render();toast('Potwierdzenie odbioru zapisane');await openOps(p.id)});$('saveDeliveryEvidence').addEventListener('click',async()=>{const p=pickups.find(x=>String(x.id)===String($('opsJobId').value));if(!p)return;const raw=[...opsDeliveryPhotos];p.deliveryPhotos=[];for(let i=0;i<raw.length;i++)p.deliveryPhotos.push(await uploadEvidence(raw[i],p,'delivery-photo',i));if(opsCanvasHasInk('deliverySignatureCanvas'))p.deliverySignature=await uploadEvidence($('deliverySignatureCanvas').toDataURL('image/png'),p,'delivery-signature',0);p.deliveredBy=cloudUser?.id||'';p.deliveredByName=currentMembership?.display_name||p.assignedName||meta.driverName||'Kierowca';save();await addJobEvent(p,'delivery_evidence',`Zapisano potwierdzenie dostawy — ${p.company}`,{photos:p.deliveryPhotos.length,signature:!!p.deliverySignature});if(cloudUser&&cloudWorkspace)await syncCloud(true);refreshOpsEvidenceStates(p);render();toast('Potwierdzenie dostawy zapisane');await openOps(p.id)});$('printProofBtn').addEventListener('click',()=>{const id=$('opsJobId').value;if(id)printProof(id)});$('transferJobBtn').addEventListener('click',async()=>{const p=pickups.find(x=>String(x.id)===String($('opsJobId').value)),newId=$('transferDriver').value;if(!p||!newId)return alert('Wybierz kierowcę.');const m=teamMembers().find(x=>x.id===newId);if(!m)return;const oldName=p.assignedName||'Nieprzypisane',oldId=p.assignedTo||'';if(oldId===newId)return toast('To zlecenie jest już przypisane do tej osoby');p.transferredFrom=oldId;p.transferredFromName=oldName;p.transferredAt=Date.now();p.assignedTo=m.id;p.assignedName=m.name;save();await addJobEvent(p,'transfer',`Przekazano zlecenie: ${oldName} → ${m.name}`,{from:oldId,to:newId});if(cloudUser&&cloudWorkspace)await syncCloud(true);render();toast('Zlecenie przekazane');await openOps(p.id)});
-$('startDayBtn').addEventListener('click',async()=>{driverDayStarted=true;localStorage.setItem('abmDriverDay','1');const now=Date.now();myJobs().forEach(p=>{if(!p.startedAt)p.startedAt=now});save();renderDriverLive();await pushActivity('Rozpoczął trasę');if(isDriver()){await syncCloud(true);startLocation()}});
+$('startDayBtn').addEventListener('click',async()=>{driverDayStarted=true;localStorage.setItem('abmDriverDay','1');const now=Date.now();myJobs().forEach(p=>{if(!p.startedAt)p.startedAt=now});save();renderDriverLive();await pushActivity('Rozpoczął trasę');if(isDriver()){await syncCloud(true);startLocation();refreshGpsOnce()}});
 $('stopDayBtn').addEventListener('click',async()=>{driverDayStarted=false;localStorage.removeItem('abmDriverDay');stopLocation();renderDriverLive();await pushActivity('Zakończył dzień');toast('Dzień zakończony')});
-$('shareLocationBtn').addEventListener('click',()=>startLocation());
+$('shareLocationBtn').addEventListener('click',()=>{if(geoWatchId!==null){stopLocation();toast('AUTO GPS wyłączony')}else startLocation()});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')resumeAutoTracking()});
+window.addEventListener('focus',()=>resumeAutoTracking());
 $('copyInviteBtn').addEventListener('click',async()=>{const c=cloudWorkspace?.invite_code||'';if(!c)return;await navigator.clipboard.writeText(c);toast('Kod zespołu skopiowany')});
 $('joinTeamBtn').addEventListener('click',async()=>{
   if(!sb||!cloudUser)return alert('Najpierw zaloguj się.');
@@ -910,7 +947,7 @@ $('joinTeamBtn').addEventListener('click',async()=>{
   $('joinCode').value='';
   await pullCloud(false);await renderCloudTeam();await startRealtime();applyRoleMode();updateAuthUI();render();toast('Dołączono jako kierowca');
 });
-driverDayStarted=localStorage.getItem('abmDriverDay')==='1';
+driverDayStarted=localStorage.getItem('abmDriverDay')==='1';updateTrackingUI(false);
 
 $('addTeamBtn').addEventListener('click',()=>openModal('teamModal'));
 $('teamForm').addEventListener('submit',e=>{

@@ -84,6 +84,8 @@ button{cursor:pointer}
 .location-row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid #20364f}.location-row:last-child{border-bottom:0}
 .live-map{height:360px;border-radius:16px;overflow:hidden;border:1px solid #31516f;background:#08131f;margin-bottom:12px}.live-map .leaflet-popup-content-wrapper,.live-map .leaflet-popup-tip{background:#0d2034;color:#fff}.live-map .leaflet-control-zoom a{background:#10243b;color:#fff;border-color:#31516f}.live-map .leaflet-control-attribution{font-size:9px}.driver-marker-wrap{background:transparent!important;border:0!important}.driver-pin{display:flex;align-items:center;gap:5px;transform:translate(-8px,-8px);white-space:nowrap}.driver-dot{width:18px;height:18px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 5px rgba(47,127,232,.22);flex:0 0 auto}.driver-tag{font-size:11px;font-weight:950;color:#fff;background:#10243b;border:1px solid #406488;border-radius:999px;padding:4px 7px;box-shadow:0 4px 12px rgba(0,0,0,.25)}.driver-dot.moving{background:#2ee59d}.driver-dot.stop{background:#ffc857}.driver-dot.offline{background:#7f8fa3}.driver-status{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 8px;font-size:10px;font-weight:950;margin-top:5px}.driver-status.moving{background:#0d3a2d;color:#9df0ca}.driver-status.stop{background:#493812;color:#ffe39b}.driver-status.offline{background:#243140;color:#c5cfda}.location-row.offline{opacity:.72}
 @media(max-width:700px){.live-map{height:320px}}
+.dispatch-live-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}.dispatch-live-card{border:1px solid #31516f;border-radius:18px;background:linear-gradient(160deg,#0d1d30,#091522);padding:14px}.dispatch-live-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.dispatch-live-card h4{font-size:17px;margin:0 0 4px}.dispatch-live-card .jobline{margin-top:10px;padding-top:10px;border-top:1px solid #20364f}.dispatch-live-card .muted{line-height:1.45}.dispatch-live-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.dispatch-map-wrap{margin-top:14px}.control-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}.control-mini{border:1px solid #2f4b69;border-radius:16px;padding:12px;background:#0a1726}.control-mini b{font-size:22px;display:block}.control-mini span{font-size:11px;color:var(--muted)}
+@media(max-width:700px){.dispatch-live-grid{grid-template-columns:1fr}.control-strip{grid-template-columns:1fr 1fr 1fr}}
 .invite-box{border:1px dashed #4e6a88;background:#0c1a2b;border-radius:18px;padding:15px}.invite-code{font-size:28px;font-weight:950;letter-spacing:3px}
 .mode-driver .owner-only{display:none!important}.mode-driver .driver-only{display:block!important}.driver-only{display:none}
 @media(max-width:760px){.invite-code{font-size:23px}}
@@ -107,7 +109,7 @@ button{cursor:pointer}
 <body>
 <header class="topbar">
   <div class="top-inner">
-    <div class="brand"><div class="logo">🚚</div><div><small>AUTO BODY MANAGER</small><h1>PRO 12.2 DISPATCH MAP</h1></div></div>
+    <div class="brand"><div class="logo">🚚</div><div><small>AUTO BODY MANAGER</small><h1>PRO 12.3 CONTROL CENTER</h1></div></div>
     <div class="top-actions"><div class="cloud-pill" id="cloudPill"><span class="cloud-dot" id="cloudDot"></span><span id="cloudText">Lokalnie</span></div><button class="icon-btn" id="accountTop" title="Konto">👤</button><button class="icon-btn" id="driverModeTop" title="Tryb kierowcy">🛣️</button><button class="icon-btn" id="quickAddTop" title="Nowe zlecenie">＋</button></div>
   </div>
 </header>
@@ -225,11 +227,15 @@ button{cursor:pointer}
 
     <section class="view" data-view="dispatch">
       <section class="panel">
-        <div class="panel-head"><div><div class="eyebrow">PRO 12.0 COMPLETE</div><h3>Dyspozytornia</h3></div><span class="live-badge"><span class="live-dot"></span>LIVE</span></div>
+        <div class="panel-head"><div><div class="eyebrow">PRO 12.3 CONTROL CENTER</div><h3>Centrum Dyspozytora</h3></div><span class="live-badge"><span class="live-dot"></span>LIVE</span></div>
         <div class="report-grid">
           <div class="report-box"><b id="dispActive">0</b><span>Aktywne</span></div><div class="report-box"><b id="dispCollected">0</b><span>W aucie</span></div>
           <div class="report-box"><b id="dispDone">0</b><span>Dostarczone dziś</span></div><div class="report-box"><b id="dispUnassigned">0</b><span>Nieprzypisane</span></div>
         </div>
+        <div class="panel-head" style="margin-top:18px"><div><div class="eyebrow">LIVE CONTROL</div><h3>Kierowcy na mapie</h3></div><span class="live-badge"><span class="live-dot"></span>NA ŻYWO</span></div>
+        <div class="control-strip"><div class="control-mini"><b id="ccMoving">0</b><span>W trasie</span></div><div class="control-mini"><b id="ccStopped">0</b><span>Postój</span></div><div class="control-mini"><b id="ccOffline">0</b><span>Offline</span></div></div>
+        <div id="dispatchMap" class="live-map dispatch-map-wrap"><div class="empty" style="padding:24px">Mapa pojawi się po odebraniu lokalizacji kierowców.</div></div>
+        <div id="dispatchLiveDrivers" class="dispatch-live-grid"></div>
         <div class="split"><div class="mini-card"><h4>Postęp dnia</h4><p id="dispProgressText">0%</p><div class="progress" style="margin-top:12px"><i id="dispProgressBar" style="width:0%"></i></div></div><div class="mini-card"><h4>Najbardziej obciążony kierowca</h4><p id="dispTopDriver">Brak danych</p></div></div><div class="panel-head" style="margin-top:18px"><div><div class="eyebrow">CONTROL CENTER</div><h3>Wymaga uwagi</h3></div></div><div class="attention-grid"><div class="attention"><b id="attUnassigned">0</b><span>Nieprzypisane</span></div><div class="attention"><b id="attLate">0</b><span>Po planowanej godzinie</span></div><div class="attention"><b id="attNoProof">0</b><span>Dostarczone bez pełnego potwierdzenia</span></div></div><div class="attention-list" id="attentionList"></div>
         <div class="panel-head" style="margin-top:18px"><div><div class="eyebrow">ZLECENIA</div><h3>Dzisiejszy plan</h3></div></div><div id="dispatchJobs"></div>
         <div class="panel-head" style="margin-top:18px"><div><div class="eyebrow">ZESPÓŁ</div><h3>Obciążenie kierowców</h3></div></div><div id="dispatchDrivers" class="team-grid"></div>
@@ -606,7 +612,7 @@ async function renderCloudTeam(){
     renderTeam();
   }
 }
-let liveMapInstance=null,liveMapLayer=null;
+let liveMapInstance=null,liveMapLayer=null,dispatchMapInstance=null,dispatchMapLayer=null;
 function driverPresence(x){
   if(!x?.updated_at)return {key:'offline',label:'OFFLINE'};
   const age=Date.now()-Date.parse(x.updated_at);
@@ -627,6 +633,22 @@ function renderLiveMap(rows,mm){
   located.forEach(x=>{const m=mm.get(x.user_id),name=m?.display_name||m?.email||'Kierowca',pos=[Number(x.lat),Number(x.lng)],st=driverPresence(x),job=driverJob(x.user_id);bounds.push(pos);const icon=L.divIcon({className:'driver-marker-wrap',html:`<div class="driver-pin"><span class="driver-dot ${st.key}"></span><span class="driver-tag">${esc(name)}</span></div>`,iconSize:[120,30],iconAnchor:[9,9]});L.marker(pos,{icon,opacity:st.key==='offline'?.68:1}).addTo(liveMapLayer).bindPopup(`<b>🚚 ${esc(name)}</b><br><span class="driver-status ${st.key}">${st.label}</span><br>${new Date(x.updated_at).toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'})} • dokładność ${Math.round(x.accuracy||0)} m${job?`<br>📦 ${esc(job.company)}${job.reg?` • ${esc(job.reg)}`:''}`:'<br>Brak aktywnego zlecenia'}`) });
   if(bounds.length===1)liveMapInstance.setView(bounds[0],16);else if(bounds.length)liveMapInstance.fitBounds(bounds,{padding:[38,38],maxZoom:16});setTimeout(()=>liveMapInstance&&liveMapInstance.invalidateSize(),80)
 }
+function renderDispatchMap(rows,mm){
+  const el=$('dispatchMap'); if(!el)return;
+  const located=rows.filter(x=>Number.isFinite(Number(x.lat))&&Number.isFinite(Number(x.lng)));
+  if(!located.length){if(dispatchMapInstance){dispatchMapInstance.remove();dispatchMapInstance=null;dispatchMapLayer=null}el.innerHTML='<div class="empty" style="padding:24px">Brak zapisanych lokalizacji kierowców.</div>';return}
+  if(!window.L){el.innerHTML='<div class="empty" style="padding:24px">Nie udało się załadować mapy.</div>';return}
+  if(!dispatchMapInstance){el.innerHTML='';dispatchMapInstance=L.map(el,{zoomControl:true});L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(dispatchMapInstance);dispatchMapLayer=L.layerGroup().addTo(dispatchMapInstance)}
+  dispatchMapLayer.clearLayers(); const bounds=[];
+  located.forEach(x=>{const m=mm.get(x.user_id),name=m?.display_name||m?.email||'Kierowca',pos=[Number(x.lat),Number(x.lng)],st=driverPresence(x),job=driverJob(x.user_id);bounds.push(pos);const icon=L.divIcon({className:'driver-marker-wrap',html:`<div class="driver-pin"><span class="driver-dot ${st.key}"></span><span class="driver-tag">${esc(name)}</span></div>`,iconSize:[120,30],iconAnchor:[9,9]});L.marker(pos,{icon,opacity:st.key==='offline'?.68:1}).addTo(dispatchMapLayer).bindPopup(`<b>🚚 ${esc(name)}</b><br><span class="driver-status ${st.key}">${st.label}</span><br>${x.updated_at?new Date(x.updated_at).toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'}):'Brak czasu'}${job?`<br>📦 ${esc(job.company)}${job.reg?` • ${esc(job.reg)}`:''}<br>${job.status==='pending'?'Do odbioru':job.status==='collected'?'W aucie':'Dostarczone'}`:'<br>Brak aktywnego zlecenia'}`)});
+  if(bounds.length===1)dispatchMapInstance.setView(bounds[0],16);else dispatchMapInstance.fitBounds(bounds,{padding:[38,38],maxZoom:16});setTimeout(()=>dispatchMapInstance&&dispatchMapInstance.invalidateSize(),80)
+}
+function renderDispatchLiveCards(rows,mm){
+  const box=$('dispatchLiveDrivers'); if(!box)return;
+  const counts={moving:0,stop:0,offline:0}; rows.forEach(x=>counts[driverPresence(x).key]++);
+  if($('ccMoving'))$('ccMoving').textContent=counts.moving;if($('ccStopped'))$('ccStopped').textContent=counts.stop;if($('ccOffline'))$('ccOffline').textContent=counts.offline;
+  box.innerHTML=rows.length?rows.map(x=>{const m=mm.get(x.user_id),name=m?.display_name||m?.email||'Kierowca',st=driverPresence(x),job=driverJob(x.user_id),hasPos=Number.isFinite(Number(x.lat))&&Number.isFinite(Number(x.lng)),t=x.updated_at?new Date(x.updated_at).toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'}):'—';return `<div class="dispatch-live-card ${st.key==='offline'?'offline':''}"><div class="dispatch-live-top"><div><h4>🚚 ${esc(name)}</h4><span class="driver-status ${st.key}">${st.label}</span></div><div class="muted">${t}</div></div><div class="jobline">${job?`<b>📦 ${esc(job.company)}</b><div class="muted">${esc(job.reg||job.address||'')} • ${job.status==='pending'?'Do odbioru':job.status==='collected'?'W aucie':'Dostarczone'}</div>`:'<b>Brak aktywnego zlecenia</b><div class="muted">Kierowca nie ma teraz otwartego punktu.</div>'}</div><div class="dispatch-live-actions">${hasPos?`<button class="act blue" onclick="window.open('https://www.google.com/maps?q=${x.lat},${x.lng}','_blank')">📍 Mapa</button>`:''}${job?`<button class="act" onclick="openOps('${job.id}')">📋 Zlecenie</button>`:''}</div></div>`}).join(''):'<div class="empty">Brak kierowców w zespole.</div>';
+}
 async function renderLiveLocations(){
   if(!sb||!cloudWorkspace||!$('liveLocations'))return;
   const {data}=await sb.from('driver_locations').select('user_id,lat,lng,accuracy,updated_at').eq('workspace_id',cloudWorkspace.id).order('updated_at',{ascending:false});
@@ -636,6 +658,8 @@ async function renderLiveLocations(){
   const locMap=new Map((data||[]).map(x=>[x.user_id,x]));
   const rows=drivers.map(m=>locMap.get(m.user_id)||{user_id:m.user_id,lat:null,lng:null,accuracy:null,updated_at:null});
   renderLiveMap(rows,mm);
+  renderDispatchMap(rows,mm);
+  renderDispatchLiveCards(rows,mm);
   $('liveLocations').innerHTML=rows.length?rows.map(x=>{const m=mm.get(x.user_id),st=driverPresence(x),job=driverJob(x.user_id),hasPos=Number.isFinite(Number(x.lat))&&Number.isFinite(Number(x.lng));return `<div class="location-row ${st.key==='offline'?'offline':''}"><div><b>📍 ${esc(m?.display_name||m?.email||'Kierowca')}</b><div><span class="driver-status ${st.key}">${st.label}</span></div><div class="muted">${x.updated_at?new Date(x.updated_at).toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'})+' • dokładność '+Math.round(x.accuracy||0)+' m':'Brak lokalizacji'}${job?`<br>📦 ${esc(job.company)}${job.reg?` • ${esc(job.reg)}`:''}`:''}</div></div>${hasPos?`<button class="act blue" onclick="window.open('https://www.google.com/maps?q=${x.lat},${x.lng}','_blank')">Otwórz</button>`:''}</div>`}).join(''):`<div class="empty">Brak kierowców w zespole.</div>`;
 }
 function myJobs(){
@@ -803,7 +827,7 @@ async function pullCloud(skipRender=false){
   }catch(err){console.warn('Pull:',err.message)}
 }
 
-function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.dataset.view===v));document.querySelectorAll('.nav-btn').forEach(x=>x.classList.toggle('active',x.dataset.nav===v));const names={dashboard:['CENTRUM DOWODZENIA','Dzień kierowcy'],route:['PLAN DNIA','Trasa'],orders:['BAZA','Zlecenia'],workshops:['KONTAKTY','Warsztaty'],history:['ARCHIWUM','Historia'],settings:['SYSTEM','Ustawienia'],cloud:['CHMURA','Konto i synchronizacja'],team:['ZESPÓŁ','Zespół i przydziały'],driverlive:['DRIVER LIVE','Moja trasa'],inventory:['MAGAZYN','Części'],customers:['KLIENCI','Klienci i auta'],expenses:['KOSZTY','Wydatki'],dispatch:['DYSPOZYTORNIA','Centrum operacyjne'],reports:['RAPORTY','Podsumowanie'],more:['AUTO BODY MANAGER PRO','Więcej']};$('viewEyebrow').textContent=names[v]?.[0]||'AUTO BODY MANAGER';$('viewTitle').textContent=names[v]?.[1]||'PRO 12.2 DISPATCH MAP';if(v==='team')setTimeout(()=>{renderLiveLocations();if(liveMapInstance)liveMapInstance.invalidateSize()},120);window.scrollTo({top:0,behavior:'smooth'})}
+function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.dataset.view===v));document.querySelectorAll('.nav-btn').forEach(x=>x.classList.toggle('active',x.dataset.nav===v));const names={dashboard:['CENTRUM DOWODZENIA','Dzień kierowcy'],route:['PLAN DNIA','Trasa'],orders:['BAZA','Zlecenia'],workshops:['KONTAKTY','Warsztaty'],history:['ARCHIWUM','Historia'],settings:['SYSTEM','Ustawienia'],cloud:['CHMURA','Konto i synchronizacja'],team:['ZESPÓŁ','Zespół i przydziały'],driverlive:['DRIVER LIVE','Moja trasa'],inventory:['MAGAZYN','Części'],customers:['KLIENCI','Klienci i auta'],expenses:['KOSZTY','Wydatki'],dispatch:['DYSPOZYTORNIA','Centrum operacyjne'],reports:['RAPORTY','Podsumowanie'],more:['AUTO BODY MANAGER PRO','Więcej']};$('viewEyebrow').textContent=names[v]?.[0]||'AUTO BODY MANAGER';$('viewTitle').textContent=names[v]?.[1]||'PRO 12.3 CONTROL CENTER';if(v==='team')setTimeout(()=>{renderLiveLocations();if(liveMapInstance)liveMapInstance.invalidateSize()},120);if(v==='dispatch')setTimeout(()=>{renderDispatch();renderLiveLocations();if(dispatchMapInstance)dispatchMapInstance.invalidateSize()},120);window.scrollTo({top:0,behavior:'smooth'})}
 function openModal(id){$(id).classList.add('open')}function closeModal(id){$(id).classList.remove('open')}
 function clearSignatureCanvas(){const c=$('signatureCanvas');const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);signatureChanged=false}
 function resetOrder(date=isoDate()){ $('orderForm').reset();$('editId').value='';$('pickupDate').value=date;$('status').value='pending';$('orderModalTitle').textContent='Nowy odbiór';pendingPhotos=[];renderPhotoPreview();clearSignatureCanvas()}
